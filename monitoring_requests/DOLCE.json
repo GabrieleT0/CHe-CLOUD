@@ -2,7 +2,7 @@
   "DOLCE": {
     "_id": "",
     "identifier": "DOLCE",
-    "title": "DOLCE : Descriptive Ontology for Linguistic and Cognitive Engineering",
+    "title": "DOLCE : Descriptive Ontology for Linguistic and Cognitive Engineerin",
     "doi": "",
     "license": "",
     "description": "DOLCE is a foundational ontology developed and maintained by the ISTC-CNR Laboratory for Applied Ontology . It was originally developed within the WonderWeb project and was conceived as the first module of the WonderWeb Foundational Ontologies Library (WFOL) together with OCHRE and BFO. DOLCE has remained stable after its first release in 2002/2003. It is formally specified in first-order logic (FOL); its consistency has been proved by Oliver Kutz and Till Mossakowski.",
@@ -35,8 +35,8 @@
     "example": [],
     "other_download": [
       {
-        "title": "",
-        "access_url": "",
+        "title": "DOLCE GitHub",
+        "access_url": "https://github.com/appliedontolab/DOLCE/tree/main",
         "description": ""
       }
     ],
@@ -44,15 +44,15 @@
     "links": [],
     "time": "",
     "triples": 0,
-    "contact-point-name": "Claudio Masolo",
-    "contact-point-email": "masolo@loa.istc.cnr.it",
     "owner-name": "Claudio Masolo",
     "owner-email": "masolo@loa.istc.cnr.it",
     "sub-category": "ch-generic",
     "category": "ch-generic",
-    "full_download-0-download_url": "https://github.com/appliedontolab/DOLCE/blob/main/OWL/DOLCEbasic-3.5.owl",
     "full_download-0-title": "DOLCE Ontology",
+    "full_download-0-download_url": "https://github.com/appliedontolab/DOLCE/blob/main/OWL/DOLCEbasic-3.5.owl",
     "other_download-0-title": "DOLCE GitHub",
-    "other_download-0-access_url": "https://github.com/appliedontolab/DOLCE/tree/main"
+    "other_download-0-access_url": "https://github.com/appliedontolab/DOLCE/tree/main",
+    "contact-point-name": "Claudio Masolo",
+    "contact-point-email": "masolo@loa.istc.cnr.it"
   }
 }
