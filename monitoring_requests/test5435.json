@@ -1,0 +1,38 @@
+{
+  "test5435": {
+    "_id": "",
+    "identifier": "test5435",
+    "title": "test",
+    "doi": "",
+    "license": "",
+    "sparql": [
+      {}
+    ],
+    "full_download": [],
+    "website": "http://localn.ci",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "trdt",
+      "email": "test@test.it"
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [
+      "ch-tangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [],
+    "other_download": [],
+    "namespace": "",
+    "links": [],
+    "time": "",
+    "triples": "2",
+    "contact-point-name": "trdt",
+    "contact-point-email": "test@test.it",
+    "sub-category": "ch-tangible",
+    "category": "ch-tangible"
+  }
+}
