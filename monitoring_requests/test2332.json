@@ -1,0 +1,42 @@
+{
+  "test2332": {
+    "_id": "",
+    "identifier": "test2332",
+    "title": "test2312",
+    "doi": "",
+    "license": "",
+    "description": {
+      "en": "fsadf43432fdsfs"
+    },
+    "sparql": [
+      {
+        "access_url": "",
+        "title": "",
+        "description": ""
+      }
+    ],
+    "full_download": [],
+    "website": "http://localn.ci",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "rerewfd",
+      "email": "dddsa@unia.xn--ir-pka"
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [
+      "ontology",
+      "ch-tangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [],
+    "other_download": [],
+    "namespace": "",
+    "links": [],
+    "time": "",
+    "triples": 0
+  }
+}
