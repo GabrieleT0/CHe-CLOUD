@@ -1,0 +1,41 @@
+{
+  "CHitaly423": {
+    "_id": "",
+    "identifier": "CHitaly423",
+    "title": "CH of vatican museum",
+    "doi": "",
+    "license": "",
+    "description": {
+      "en": "This is a dataset that models the object in the vatican museums"
+    },
+    "sparql": [
+      {
+        "access_url": "",
+        "title": "",
+        "description": ""
+      }
+    ],
+    "full_download": [],
+    "website": "http://localn.ci",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "test",
+      "email": "masolo@loa.istc.cnr.it"
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [
+      "ch-tangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [],
+    "other_download": [],
+    "namespace": "",
+    "links": [],
+    "time": "",
+    "triples": 0
+  }
+}
