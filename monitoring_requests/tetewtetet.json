@@ -1,0 +1,39 @@
+{
+  "tetewtetet": {
+    "_id": "",
+    "identifier": "tetewtetet",
+    "title": "ttestsetsegtsrgfdgtdfg",
+    "doi": "",
+    "license": "",
+    "description": {
+      "en": "gdfgdfgds"
+    },
+    "sparql": [
+      {
+        "access_url": "",
+        "title": "",
+        "description": ""
+      }
+    ],
+    "full_download": [],
+    "website": "http://localn.ci",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "",
+      "email": ""
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [],
+    "newKeyword": "",
+    "Image": "",
+    "example": [],
+    "other_download": [],
+    "namespace": "",
+    "links": [],
+    "time": "",
+    "triples": 0
+  }
+}
