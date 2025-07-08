@@ -1,0 +1,41 @@
+{
+  "testtte": {
+    "_id": "",
+    "identifier": "testtte",
+    "title": "dgsdgsgfg",
+    "doi": "",
+    "license": "",
+    "description": {
+      "en": "gsfgdfsvcxxvbv"
+    },
+    "sparql": [
+      {
+        "access_url": "",
+        "title": "",
+        "description": ""
+      }
+    ],
+    "full_download": [],
+    "website": "http://test.testt",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "etetetwt",
+      "email": "trestt@gmail.com"
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [
+      "ch-tangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [],
+    "other_download": [],
+    "namespace": "",
+    "links": [],
+    "time": "",
+    "triples": 0
+  }
+}
