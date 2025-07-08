@@ -1,0 +1,41 @@
+{
+  "vatmus321": {
+    "_id": "",
+    "identifier": "vatmus321",
+    "title": "Vatican Museums",
+    "doi": "",
+    "license": "",
+    "description": {
+      "en": "Dataset that models as LD the object in the vatican museums"
+    },
+    "sparql": [
+      {
+        "access_url": "",
+        "title": "",
+        "description": ""
+      }
+    ],
+    "full_download": [],
+    "website": "https://nemo-ufes.github.io/gufo/",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "fdsfdsf",
+      "email": "masolo@loa.istc.cnr.it"
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [
+      "ch-tangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [],
+    "other_download": [],
+    "namespace": "",
+    "links": [],
+    "time": "",
+    "triples": 0
+  }
+}
