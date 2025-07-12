@@ -1,0 +1,45 @@
+{
+  "testeto342": {
+    "_id": "",
+    "identifier": "testeto342",
+    "title": "fddfdnc434323",
+    "doi": "",
+    "license": "",
+    "description": {
+      "en": "fdsfjdn3o4jh23or"
+    },
+    "sparql": {
+      "0": {
+        "access_url": "",
+        "title": "",
+        "description": ""
+      },
+      "access_url": "http://fdsfdsf.com",
+      "title": "fsdfdsfasdf",
+      "description": "dsfdsfasfdsf"
+    },
+    "full_download": [],
+    "website": "http://localn.ci",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "test34",
+      "email": "test44@live.com"
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [
+      "ch-tangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [],
+    "other_download": [],
+    "namespace": "",
+    "links": [],
+    "time": "",
+    "triples": "2",
+    "category": "ch-tangible"
+  }
+}
