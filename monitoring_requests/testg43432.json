@@ -1,0 +1,65 @@
+{
+  "testg43432": {
+    "_id": "",
+    "identifier": "testg43432",
+    "title": "trst32fdf",
+    "doi": "",
+    "license": "",
+    "description": {
+      "en": "fdskvsdoi43242"
+    },
+    "sparql": [
+      {
+        "access_url": "https://test.tetst",
+        "title": "test",
+        "description": "test"
+      }
+    ],
+    "full_download": [
+      {
+        "title": "dsdas",
+        "download_url": "https://test",
+        "description": ""
+      },
+      {
+        "title": "sfdfdsf",
+        "download_url": "http://cnsudcnds.com",
+        "description": "dsfdsf"
+      }
+    ],
+    "website": "http://localn.ci",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "test klok",
+      "email": "test@gmail.com"
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [
+      "ch-tangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [
+      {
+        "title": "trfgdf",
+        "access_url": "http://exampl.comdf",
+        "description": "fsdfsdff"
+      }
+    ],
+    "other_download": [
+      {
+        "title": "fdsfsdf",
+        "access_url": "https://test.com",
+        "description": "fsdfsdfjk"
+      }
+    ],
+    "namespace": "",
+    "links": [],
+    "time": "",
+    "triples": 0,
+    "category": "ch-tangible"
+  }
+}
