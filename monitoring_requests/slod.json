@@ -2,11 +2,11 @@
   "slod": {
     "_id": "slod",
     "identifier": "slod",
-    "title": "Linked Stage Graph TEST TEST TEST",
+    "title": "Linked Stage Graph test teste",
     "doi": "",
     "license": "https://creativecommons.org/licenses/by/3.0/",
     "description": {
-      "en": "Linked Stage Graph is a Knowledge Graph using a dataset by the Archive of Baden-Wuerttemberg, Germany. It contains black and white photographs and metadata about the Stuttgart State Theaters from the 1890s to the 1940s. The original EAD-XML files were converted to RDF and named entities were extracted and linked to Wikidata and the German Authority Files (GND) cxzcxzczxczxvsberb565464hfdhdf"
+      "en": "Linked Stage Graph is a Knowledge Graph using a dataset by the Archive of Baden-Wuerttemberg, Germany. It contains black and white photographs and metadata about the Stuttgart State Theaters from the 1890s to the 1940s. The original EAD-XML files were converted to RDF and named entities were extracted and linked to Wikidata and the German Authority Files (GND). tetstet e"
     },
     "sparql": [
       {
@@ -16,7 +16,7 @@
       }
     ],
     "full_download": [],
-    "website": "http://slod.fiz-karlsruhe.de/noncsa31",
+    "website": "http://slod.fiz-karlsruhe.de/rewtnerjk43",
     "domain": "cultural-heritage",
     "contact_point": {
       "name": "Tabea Tietz",
@@ -53,7 +53,7 @@
       }
     ],
     "time": "",
-    "triples": "4035934068549645",
+    "triples": "4234325456345",
     "category": "ch-tangible"
   }
 }
