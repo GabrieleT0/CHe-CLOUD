@@ -1,0 +1,62 @@
+{
+  "princeton-library-findingaids": {
+    "_id": "princeton-library-findingaids",
+    "identifier": "princeton-library-findingaids",
+    "title": "Princeton Library FindingAids",
+    "doi": "",
+    "license": "",
+    "description": {
+      "en": "Use this site to explore descriptions of our unique holdings at the Princeton University Libraries, which include manuscripts, archival collections, images, ephemera, and much more one-of-a-kind material."
+    },
+    "sparql": [],
+    "full_download": [],
+    "website": "http://findingaids.princeton.edu/",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "test",
+      "email": "huhhb@gmail.com"
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [
+      "LinkedDataCrawl2014",
+      "crawledLinkedDataCloud2014",
+      "format-dcterm",
+      "format-dctypes",
+      "format-foaf",
+      "format-open",
+      "format-rdf",
+      "format-time",
+      "format-vcard2006",
+      "lodcloud-diagram-2014-08-30",
+      "non-deref-vocab",
+      "provenance-metadata",
+      "publications",
+      "cultural-heritage",
+      "ch-tangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [
+      {
+        "title": "",
+        "access_url": "http://findingaids.princeton.edu/collections/C0108/c02283",
+        "description": "Example resource"
+      }
+    ],
+    "other_download": [],
+    "namespace": "",
+    "links": [
+      {
+        "target": "lcsh",
+        "value": "9"
+      }
+    ],
+    "time": "",
+    "triples": 0,
+    "category": "ch-tangible",
+    "image": ""
+  }
+}
