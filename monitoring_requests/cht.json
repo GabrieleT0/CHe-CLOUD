@@ -1,0 +1,75 @@
+{
+  "cht": {
+    "_id": "cht",
+    "identifier": "cht",
+    "title": "tetetwtrwtwCultural Heritage Thesaurus",
+    "doi": "",
+    "license": "http://www.opendefinition.org/licenses/cc-by",
+    "description": {
+      "en": "twtwetwrtrwtrConcepts that cover the cultural heritage field in the Netherlands."
+    },
+    "sparql": [
+      {
+        "access_url": "https://digitaalerfgoed.poolparty.biz/PoolParty/sparql/term/id/cht",
+        "title": "Cultuurhistorische Thesaurus SPARQL",
+        "description": ""
+      }
+    ],
+    "full_download": [
+      {
+        "title": "Cultuurhistorische Thesaurus",
+        "download_url": "https://data.cultureelerfgoed.nl/term/id/cht/export/term/id/cht.ttl",
+        "description": ""
+      }
+    ],
+    "website": "https://data.cultureelerfgoed.nl/",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "Joop Vanderheiden",
+      "email": "j.vanderheiden@cultureelerfgoed.nl"
+    },
+    "owner": {
+      "name": "",
+      "email": "jolietjakeblues64@gmail.com"
+    },
+    "keywords": [
+      "cultural heritage",
+      "archaeology",
+      "Architecture",
+      "Arthistory",
+      "historical buildings",
+      "cultural-heritage",
+      "ch-tangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [],
+    "other_download": [],
+    "namespace": "https://data.cultureelerfgoed.nl/term/id/cht/tesstet",
+    "links": [
+      {
+        "_id": "1629e81a-918a-c6a7-2431-fdc7eaf21a78",
+        "target": "dbpedia-nl",
+        "value": "1996"
+      },
+      {
+        "_id": "2b8e35cd-e762-d31b-9c7d-2a046061d713",
+        "target": "dbpedia",
+        "value": "42"
+      },
+      {
+        "_id": "7ad360fd-2b8b-a56f-d0a6-0cefc7ee54a5",
+        "target": "getty-aat",
+        "value": "1683"
+      },
+      {
+        "_id": "0ffe9adc-0a63-2bb8-85e4-7399c1686f0e",
+        "target": "wikidata",
+        "value": "36"
+      }
+    ],
+    "time": "",
+    "triples": "43",
+    "category": "ch-tangible"
+  }
+}
