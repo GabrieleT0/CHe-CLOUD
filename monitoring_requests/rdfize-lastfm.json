@@ -1,0 +1,87 @@
+{
+  "rdfize-lastfm": {
+    "_id": "rdfize-lastfm",
+    "identifier": "rdfize-lastfm",
+    "title": "Last.FM RDFization of Events, Artists, and Users",
+    "doi": "",
+    "license": "",
+    "description": {
+      "en": "A Linked Data wrapper around some of the last.fm API."
+    },
+    "sparql": [
+      {
+        "access_url": "",
+        "title": "",
+        "description": ""
+      }
+    ],
+    "full_download": [],
+    "website": "http://lastfm.rdfize.com",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "Keith Alexander",
+      "email": "keith.alexander@talis.com"
+    },
+    "owner": {
+      "name": "",
+      "email": ""
+    },
+    "keywords": [
+      "format-foaf",
+      "format-rdf",
+      "format-vcard",
+      "lastfm",
+      "lod",
+      "lodcloud-diagram-2011-09-19",
+      "lodcloud-diagram-2014-08-30",
+      "media",
+      "music",
+      "no-license-metadata",
+      "no-proprietary-vocab",
+      "no-vocab-mappings",
+      "provenance-metadata",
+      "published-by-third-party",
+      "cultural-heritage",
+      "ch-intangible"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [
+      {
+        "title": "",
+        "access_url": "http://lastfm.rdfize.com/events/937256",
+        "description": "Example (Turtle)"
+      }
+    ],
+    "other_download": [
+      {
+        "title": "",
+        "access_url": "http://lastfm.rdfize.com/meta.n3",
+        "description": "voiD description"
+      }
+    ],
+    "namespace": "http://lastfm.rdfize.com/",
+    "links": [
+      {
+        "target": "bbc-music",
+        "value": "5000000"
+      },
+      {
+        "target": "dbpedia",
+        "value": "23000"
+      },
+      {
+        "target": "dbtune-artists-last-fm",
+        "value": "5000000"
+      },
+      {
+        "target": "qdos",
+        "value": "40000000"
+      }
+    ],
+    "time": "",
+    "triples": "400000020",
+    "category": "ch-intangible",
+    "image": ""
+  }
+}
