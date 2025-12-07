@@ -1,0 +1,50 @@
+{
+  "mappingch": {
+    "_id": "",
+    "identifier": "mappingch",
+    "title": "MappingChange",
+    "doi": "10.5281/zenodo.15393936",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "description": {
+      "en": "MappingChange is a temporal and semantically enriched knowledge graph (KG) constructed from the Gazetteers of Scotland (1803–1901). This KG describes over 50,000 article-level place descriptions. The resulting entries are represented using the Heritage Textual Ontology (HTO) and transformed into an RDF KG capturing both bibliographic metadata and textual content. This KG is further enriched by 1) connecting semantically related entries across editions and aligning them with Wikidata and DBpedia, and 2) identifying referenced places within articles and assigning modern coordinates to support spatial analysis."
+    },
+    "sparql": [
+      {
+        "access_url": "http://query.frances-ai.com/hto_gaz/sparql",
+        "title": "MappingChange's SPARQL Endpoint",
+        "description": "SPARQL Endpoint for MappingChange"
+      }
+    ],
+    "full_download": [],
+    "website": "https://github.com/francesNLP/MappingChange",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "Lilin Yu",
+      "email": "l.yu-40@sms.ed.ac.uk"
+    },
+    "owner": {
+      "name": "Lilin Yu",
+      "email": "l.yu-40@sms.ed.ac.uk"
+    },
+    "keywords": [
+      "ch-tangible",
+      "Gazetteers",
+      "KnoweldgeGraph",
+      "SemanticWeb",
+      "HistoricalText",
+      "Ontology",
+      "LinkedData",
+      "CulturalHeritage",
+      "Geolocation"
+    ],
+    "newKeyword": "",
+    "Image": "",
+    "example": [],
+    "other_download": [],
+    "namespace": "https://w3id.org/hto/",
+    "links": [],
+    "time": "",
+    "triples": "8242877",
+    "category": "ch-tangible"
+  }
+}
