@@ -227,7 +227,7 @@ function FairnessInfo(){
                                 <strong>Contact point not specified</strong>
                             </Col>
                         )}
-                        {dataset_metadata.sparql[0] ? (
+                        {dataset_metadata.sparql ? (
                             <Col md={6} className="mb-3">
                                 <strong>SPARQL Endpoint: </strong>
                                 <a href={dataset_metadata.sparql[0].access_url} target="_blank" rel="noopener noreferrer">
