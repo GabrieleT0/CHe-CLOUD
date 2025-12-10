@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf';
 import 'svg2pdf.js';
 import { Download, ImageDown } from "lucide-react";
 import Footer from './footer';
+import { base_url, kghb_url } from '../api';
 
 const StaticGraph = ({ data }) => {
     const [graphRendered, setGraphRendered] = useState(false);
@@ -530,6 +531,30 @@ const StaticGraph = ({ data }) => {
         });
     };
 
+
+const handleDownloadCSV = async () => {
+    try {
+        const response = await fetch(`${base_url}/CHe_cloud_data/export_csv`);
+        
+        if (!response.ok) {
+        throw new Error('Failed to download CSV');
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'CHeCLOUD_datasets.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error downloading CSV:', error);
+        alert('Failed to download CSV. Please try again.');
+    }
+    };
+
     return (
         <div
           style={{
@@ -588,6 +613,15 @@ const StaticGraph = ({ data }) => {
               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#EF4444")}
             >
               Download Cloud as PDF
+            </button>
+            
+            <button
+              onClick={handleDownloadCSV}
+              style={buttonStyle("#F59E0B", "#D97706")}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#D97706")}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#F59E0B")}
+            >
+              Download Cloud as CSV
             </button>
           </div>
           <Footer />

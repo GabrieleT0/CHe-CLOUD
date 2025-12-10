@@ -6,7 +6,7 @@ const fs = require('fs');
 const csv = require('csv-parser');
 require('dotenv').config();
 const path = require('path');
-
+const { parse } = require('json2csv');
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 const fairness_page = 'fairness-info';
 const khgeartbeatUrl = process.env.KGHEARTBEAT_API
@@ -87,6 +87,49 @@ router.get('/all_ch_links', async (req, res) => {
         res.json(response);
         
     } catch (error) {
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.get('/export_csv', async (req, res) => {
+    try {
+        const items = await getAllJsonData();
+        if (!items.length) {
+            return res.status(404).json({ message: "No elements found." });
+        }
+
+        // Define fields with custom labels
+        const fields = [
+            { label: 'Identifier', value: 'identifier' },
+            { label: 'Title', value: 'title' },
+            { label: 'Description', value: (row) => row.description?.en || '' },
+            { label: 'Keywords', value: (row) => (row.keywords || []).join('; ') },
+            { label: 'License', value: 'license' },
+            { label: 'doi', value: 'doi' },
+            { label: 'Contact point', value: (row) => `Name: ${row.contact_point?.name || ''} Email: ${row.contact_point?.email || ''}` },
+            { label: 'Website', value: 'website' },
+            { label: 'Triples', value: 'triples' },
+            { label: 'owner', value: (row) => `Name: ${row.owner?.name || ''} Email: ${row.owner?.email || ''}` },
+            { label: 'SPARQL Endpoint', value: (row) => row.sparql_endpoint?.[0].access_url || '' },
+            { label: 'RDF dump', value: (row) => row.full_download && row.full_download.length > 0 ? row.full_download.map(item => item.download_url).join(' | ') : '' },
+            { label: 'Other download', value: (row) => row.other_download && row.other_download.length > 0 ? row.other_download.map(item => item.access_url).join(' | ') : '' },
+            { label: 'Namespace', value: 'namespace' },
+            { label: 'Examples',  value: (row) => row.example && row.example.length > 0 ? row.example.map(item => item.access_url).join(' | ') : '' },
+            // Map fairness fields
+            ...Object.entries(keyMapping).map(([key, label]) => ({
+                label: label,
+                value: `fairness.${key}`
+            }))
+        ];
+
+        const csv = parse(items, { fields });
+
+        res.setHeader('Content-Disposition', 'attachment; filename="CHe-CLOUD_datasets.csv"');
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.status(200).send(csv);
+
+    } catch (error) {
+        console.error('CSV export error:', error);
         res.status(500).json({ message: "Server error" });
     }
 });
