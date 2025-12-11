@@ -483,7 +483,7 @@ const FormComponent = () => {
                   <span className="visually-hidden">Loading...</span>
                 </div>
                 <h5 className="mb-2">Processing your submission...</h5>
-                <p className="text-muted mb-0">Please wait while we analyze your dataset metadata with LLM to check if is a CH dataset.</p>
+                <p className="text-muted mb-0">Please wait while we analyze your dataset metadata with LLM to check if is a cultural heritage dataset.</p>
               </div>
             </div>
           </div>
@@ -504,15 +504,23 @@ const FormComponent = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                {modalData.llm_response.category && (
-                  <div>                  
-                    {modalData.llm_response != '' ? (
+                {modalData.llm_failed ? (
+                  <div className="alert alert-warning">
+                    <h6>⚠️ LLM Categorization Unavailable</h6>
+                    <p>{modalData.llm_response.message || 'Unable to categorize with LLM at this time. A human operator will review your submission.'}</p>
+                    <p className="mb-0">You can review your metadata or submit the dataset anyway. A human operator will verify if your dataset satisfies the inclusion criteria for the CHeCLOUD.</p>
+                    <hr />
+                    <small><b>Model used:</b> {modalData.model_used}</small>
+                  </div>
+                ) : (
+                  <div>
+                    {modalData.llm_response.category && modalData.llm_response.category !== '' ? (
                       <div>
                         <b>LLM categorized your data as:</b> {modalData.llm_response.category} <br></br>
                         <b>LLM assign this sub-category: </b> 
-                        {modalData.llm_response.sub_category != '' ? (
+                        {modalData.llm_response.sub_category && modalData.llm_response.sub_category !== '' ? (
                           modalData.llm_response.sub_category 
-                        ):(
+                        ) : (
                           'No sub-category assigned by the LLM'
                         )} <br></br>
                         <b>Model used:</b> {modalData.model_used}
