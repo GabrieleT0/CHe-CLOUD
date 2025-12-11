@@ -44,54 +44,111 @@ router.post('/llm_topic', async (req, res) => {
     const userInput = req.body;
 
     if (!userInput) return res.status(400).json({ error: "Missing input" });
-    const dataset_id = userInput.identifier
-    const dataset_title = userInput.title
-    const dataset_description = userInput.description.en
-    const llm = getLLMClient();
+    
+    const dataset_id = userInput.identifier;
+    const dataset_title = userInput.title;
+    const dataset_description = userInput.description.en;
+    
+    try {
+      const llm = getLLMClient();
 
-    const prompt = ChatPromptTemplate.fromMessages([
-      ["system", "You are a helpful assistant."],
-      ["human", PROMPT],
-      ["human", `Dataset ID: {id}, Title: {title}, Description: {description}`]
-    ]);
+      const prompt = ChatPromptTemplate.fromMessages([
+        ["system", "You are a helpful assistant."],
+        ["human", PROMPT],
+        ["human", `Dataset ID: {id}, Title: {title}, Description: {description}`]
+      ]);
 
-    const chain = prompt.pipe(llm);
+      const chain = prompt.pipe(llm);
 
-    const response = await chain.invoke({
+      const response = await chain.invoke({
         id: dataset_id,
         title: dataset_title,
         description: dataset_description
-    });
-    console.log("LLM response:", response);
+      });
+      
+      console.log("LLM response:", response);
 
-    if (!response || !response.content) {
-      return res.status(500).json({ error: "LLM response is empty or malformed" });
-    }
+      if (!response || !response.content) {
+        // LLM failed but allow submission
+        return res.json({
+          'llm_response': {
+            category: '',
+            sub_category: '',
+            message: 'Unable to categorize with LLM at this time.'
+          },
+          'model_used': process.env.LLM_MODEL || 'N/A',
+          'llm_failed': true
+        });
+      }
 
-    // Assuming response.content is a stringified JSON object
-    try {
+      // Try to parse the LLM response
+      try {
         const cleaned_response = response.content
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/```$/, '')
-        .trim();
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/```$/, '')
+          .trim();
         const parsedResponse = JSON.parse(cleaned_response);
         
         if (!parsedResponse) {
-            return res.status(400).json({ error: "LLM did not return a valid JSON" });
+          // Parsing failed but allow submission
+          return res.json({
+            'llm_response': {
+              category: '',
+              sub_category: '',
+              message: 'Unable to categorize with LLM at this time.'
+            },
+            'model_used': process.env.LLM_MODEL || 'N/A',
+            'llm_failed': true
+          });
         }
+        
+        // Success - return parsed response
         res.json({
-            'llm_response': parsedResponse,
-            'model_used': process.env.LLM_MODEL
-
+          'llm_response': parsedResponse,
+          'model_used': process.env.LLM_MODEL,
+          'llm_failed': false
         });
-    } catch (parseError) {
+        
+      } catch (parseError) {
         console.error("Error parsing LLM response:", parseError);
-        return res.status(500).json({ error: "Failed to parse LLM response" });
+        // Parsing failed but allow submission
+        return res.json({
+          'llm_response': {
+            category: '',
+            sub_category: '',
+            message: 'Unable to categorize with LLM at this time.'
+          },
+          'model_used': process.env.LLM_MODEL || 'N/A',
+          'llm_failed': true
+        });
+      }
+      
+    } catch (llmError) {
+      console.error("LLM error:", llmError);
+      // LLM error but allow submission
+      return res.json({
+        'llm_response': {
+          category: '',
+          sub_category: '',
+          message: 'Unable to categorize with LLM at this time.'
+        },
+        'model_used': process.env.LLM_MODEL || 'N/A',
+        'llm_failed': true
+      });
     }
+    
   } catch (err) {
-    console.error("LLM error:", err);
-    res.status(500).json({ error: "LLM processing failed" });
+    console.error("Request processing error:", err);
+    res.json({
+      'llm_response': {
+        category: '',
+        sub_category: '',
+        message: 'Unable to categorize with LLM at this time.'
+      },
+      'model_used': 'N/A',
+      'llm_failed': true
+    });
   }
 });
 
