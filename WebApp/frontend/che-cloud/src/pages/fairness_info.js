@@ -189,14 +189,6 @@ function FairnessInfo(){
                 )}
                 </div>
 
-                {dataset_metadata?.keywords && !dataset_metadata.keywords.includes("CHeCLOUD") && (
-                    <div className="mt-2">
-                        <span className="badge bg-info text-dark">
-                            Metadata sourced from <a href="https://lod-cloud.net/" target="_blank" rel="noopener noreferrer" className="text-dark text-decoration-none"><strong>LOD Cloud</strong></a>
-                        </span>
-                    </div>
-                )}
-
                 {dataset_metadata.description ? (
                     <p className="text-justify mb-5">{dataset_metadata.description.en}</p>
                 ) : (
@@ -204,7 +196,7 @@ function FairnessInfo(){
                 )}
 
             {dataset_metadata && (
-                <div className="card shadow-sm p-4 mb-5">
+                <div className="card shadow-sm p-4 mb-1">
                     <h5 className="mb-3">Dataset Information</h5>
                     <Row>
                         {dataset_metadata.website && (
@@ -275,6 +267,13 @@ function FairnessInfo(){
                     </Row>
                 </div>
             )}
+            <div className="mb-4">
+                {dataset_metadata?.keywords && !dataset_metadata.keywords.includes("CHeCLOUD") && (
+                    <small className="text-muted ">
+                        Metadata sourced from <a href="https://lod-cloud.net/" target="_blank" rel="noopener noreferrer" className="text-dark text-decoration-none"><strong>LOD Cloud</strong></a>
+                    </small>
+                )}
+            </div>
                 <div className="mb-3">
                     <small className="text-muted">
                         FAIR metrics last updated on: <b>{new Date(fairness_data.analysis_date).toLocaleDateString('en-US', {
