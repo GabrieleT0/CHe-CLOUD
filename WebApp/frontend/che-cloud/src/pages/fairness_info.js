@@ -189,6 +189,14 @@ function FairnessInfo(){
                 )}
                 </div>
 
+                {dataset_metadata?.keywords && !dataset_metadata.keywords.includes("CHeCLOUD") && (
+                    <div className="mt-2">
+                        <span className="badge bg-info text-dark">
+                            Metadata sourced from <a href="https://lod-cloud.net/" target="_blank" rel="noopener noreferrer" className="text-dark text-decoration-none"><strong>LOD Cloud</strong></a>
+                        </span>
+                    </div>
+                )}
+
                 {dataset_metadata.description ? (
                     <p className="text-justify mb-5">{dataset_metadata.description.en}</p>
                 ) : (
