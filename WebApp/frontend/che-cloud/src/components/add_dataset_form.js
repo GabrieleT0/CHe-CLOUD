@@ -29,7 +29,6 @@ const FormComponent = () => {
         email : '',
     },
     keywords: [],
-    newKeyword: "",
     Image: '',
     example: [],
     other_download: [],
@@ -273,8 +272,13 @@ const FormComponent = () => {
     setError(null);
     setIsInitialSubmitting(true);
 
+    const keywordsWithDefault = formData.keywords.includes('CHeCLOUD')
+      ? formData.keywords
+      : [...formData.keywords, 'CHeCLOUD'];
+
     const formattedData = {
         ...formData,
+        keywords: keywordsWithDefault,
         sparql: [{
           access_url: formData.sparql.access_url,
           title: formData.sparql.title,
