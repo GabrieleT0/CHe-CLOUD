@@ -47,6 +47,7 @@ const FormComponent = () => {
   const [modalData, setModalData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitialSubmitting, setIsInitialSubmitting] = useState(false);
+  const [acceptLicense, setAcceptLicense] = useState(false);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const dataset_id = queryParams.get('dataset_id');
@@ -268,6 +269,13 @@ const FormComponent = () => {
       form.classList.add('was-validated'); 
       return;
     }
+
+    if (!acceptLicense) {
+      setError('You must accept the CC BY-SA 4.0 license terms to submit the form.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setSubmitted(false);
     setError(null);
     setIsInitialSubmitting(true);
@@ -342,6 +350,7 @@ const FormComponent = () => {
       // Success - reset form and show success message
       setShowModal(false);
       setSubmitted(true);
+      setAcceptLicense(false);
       setFormData({
         _id: '',
         identifier: '',
@@ -1064,6 +1073,30 @@ const FormComponent = () => {
             </button>
           </div>
         ))}
+
+        <div className="border p-4 mt-4 mb-4 rounded bg-light">
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="acceptLicense"
+              checked={acceptLicense}
+              onChange={(e) => setAcceptLicense(e.target.checked)}
+              required
+            />
+            <label className="form-check-label" htmlFor="acceptLicense">
+              <span className="text-danger">*</span> I understand and agree that by submitting this form, the metadata of the dataset will be made available under the{' '}
+              <a 
+                href="https://creativecommons.org/licenses/by-sa/4.0/legalcode" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="fw-bold"
+              >
+                Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license
+              </a>.
+            </label>
+          </div>
+        </div>
 
         <button type="submit" className="btn btn-primary">Send</button>
       </form>
