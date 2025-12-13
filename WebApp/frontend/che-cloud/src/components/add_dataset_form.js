@@ -1095,7 +1095,7 @@ const FormComponent = () => {
             <label className="form-check-label" htmlFor="acceptLicense">
               <span className="text-danger">*</span> I understand and agree that by submitting this form, the metadata of the dataset will be made available under the{' '}
               <a 
-                href="https://creativecommons.org/licenses/by-sa/4.0/legalcode" 
+                href="https://creativecommons.org/licenses/by-sa/4.0/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="fw-bold"
