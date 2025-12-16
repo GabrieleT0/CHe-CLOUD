@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import { jsPDF } from 'jspdf';
 import 'svg2pdf.js';
@@ -8,20 +8,44 @@ import { base_url, kghb_url } from '../api';
 
 const StaticGraph = ({ data }) => {
     const [graphRendered, setGraphRendered] = useState(false);
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const containerRef = useRef(null);
+
+    // Handle responsive resizing
+    useEffect(() => {
+        const updateDimensions = () => {
+            if (containerRef.current) {
+                const { clientWidth, clientHeight } = containerRef.current;
+                setDimensions({ width: clientWidth, height: clientHeight });
+                setGraphRendered(false); // Force re-render on resize
+            }
+        };
+
+        updateDimensions();
+        window.addEventListener('resize', updateDimensions);
+        
+        return () => window.removeEventListener('resize', updateDimensions);
+    }, []);
 
     useEffect(() => {
-        if (data.nodes.length === 0 || data.links.length === 0 || graphRendered) return;
+        if (data.nodes.length === 0 || data.links.length === 0 || !dimensions.width) return;
         
-        // Render the graph once without animation
+        // Render the graph
         renderStaticGraph();
         setGraphRendered(true);
-    }, [data, graphRendered]);
+    }, [data, dimensions]);
 
     const renderStaticGraph = () => {
         const svgElement = document.getElementById("graph");
-        const width = svgElement.clientWidth;
-        const height = svgElement.clientHeight;
+        const width = dimensions.width;
+        const height = dimensions.height;
         const svg = d3.select("#graph");
+        
+        // Responsive breakpoints
+        const isMobile = width < 768;
+        const isTablet = width >= 768 && width < 1024;
+        const isDesktop = width >= 1024;
+        
         const categories = Array.from(new Set(data.nodes.map(node => node.category)));
         const categoryColors = {
             "Tangible": "#bddbcf",
@@ -32,31 +56,36 @@ const StaticGraph = ({ data }) => {
         const colorScale = d3.scaleOrdinal()
             .domain(Object.keys(categoryColors))
             .range(Object.values(categoryColors));
-
-        // Define the boundary between connected and isolated nodes
-        const boundaryX = width * 0.6;
     
         // Clear previous graph elements
         svg.selectAll("*").remove();
     
+        // Responsive legend positioning and sizing
+        const legendX = isMobile ? 5 : 10;
+        const legendY = isMobile ? 5 : 10;
+        const legendSpacing = isMobile ? 18 : 20;
+        const legendRectSize = isMobile ? 12 : 15;
+        const legendFontSize = isMobile ? 10 : 12;
+        
         // Draw color legend
-        const legend = svg.append("g").attr("transform", "translate(10, 10)");
+        const legend = svg.append("g").attr("transform", `translate(${legendX}, ${legendY})`);
     
         legend.selectAll("rect")
             .data(categories)
             .enter().append("rect")
             .attr("x", 0)
-            .attr("y", (d, i) => i * 20)
-            .attr("width", 20)
-            .attr("height", 15)
+            .attr("y", (d, i) => i * legendSpacing)
+            .attr("width", legendRectSize)
+            .attr("height", legendRectSize)
             .attr("fill", d => colorScale(d));
     
         legend.selectAll("text")
             .data(categories)
             .enter().append("text")
             .attr("font-family", "Arial")
-            .attr("x", 30)
-            .attr("y", (d, i) => i * 20 + 12)
+            .attr("font-size", `${legendFontSize}px`)
+            .attr("x", legendRectSize + 8)
+            .attr("y", (d, i) => i * legendSpacing + legendRectSize - 2)
             .text(d => d)
             .attr("class", "legend");
         
@@ -71,14 +100,14 @@ const StaticGraph = ({ data }) => {
         const connectedNodes = data.nodes.filter(node => linkedNodeIds.has(node.id));
         const isolatedNodes = data.nodes.filter(node => !linkedNodeIds.has(node.id));
         
-        // Process links to ensure they reference only connected nodes
+        // Process links
         const validLinks = data.links.filter(link => {
             const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
             const targetId = typeof link.target === 'object' ? link.target.id : link.target;
             return linkedNodeIds.has(sourceId) && linkedNodeIds.has(targetId);
         });
         
-        // Calculate the number of incoming links for each node
+        // Calculate incoming links
         const incomingLinkCounts = {};
         data.nodes.forEach(node => {
             incomingLinkCounts[node.id] = 0;
@@ -89,9 +118,9 @@ const StaticGraph = ({ data }) => {
             incomingLinkCounts[targetId] = (incomingLinkCounts[targetId] || 0) + 1;
         });
         
-        // Create a scale for node sizes based on incoming links
-        const minNodeSize = 25;
-        const maxNodeSize = 60;
+        // Responsive node sizes
+        const minNodeSize = isMobile ? 20 : isTablet ? 22 : 25;
+        const maxNodeSize = isMobile ? 45 : isTablet ? 50 : 60;
         const maxIncomingLinks = Math.max(1, ...Object.values(incomingLinkCounts));
         
         const nodeSizeScale = d3.scaleLinear()
@@ -99,51 +128,53 @@ const StaticGraph = ({ data }) => {
             .range([minNodeSize, maxNodeSize])
             .clamp(true);
         
-        // Define the boundary between connected and isolated nodes (horizontal split)
-        const boundaryY = height * 0.7;
+        // Responsive boundary
+        const boundaryY = height * (isMobile ? 0.65 : 0.7);
 
-        // Split nodes into connected and isolated remains the same
+        // Responsive force simulation parameters
+        const linkDistance = isMobile ? 80 : isTablet ? 120 : 150;
+        const chargeStrength = isMobile ? -15 : isTablet ? -20 : -25;
+        const collisionPadding = isMobile ? 5 : 9;
 
-        // Pre-calculate positions for connected nodes using D3 force layout
+        // Pre-calculate positions for connected nodes
         const simulation = d3.forceSimulation(connectedNodes)
-            .force("link", d3.forceLink(validLinks).id(d => d.id).distance(150))
-            .force("charge", d3.forceManyBody().strength(-25))
+            .force("link", d3.forceLink(validLinks).id(d => d.id).distance(linkDistance))
+            .force("charge", d3.forceManyBody().strength(chargeStrength))
             .force("center", d3.forceCenter(width / 2, boundaryY / 2))
-            .force("collide", d3.forceCollide(d => nodeSizeScale(incomingLinkCounts[d.id]) + 9))
+            .force("collide", d3.forceCollide(d => nodeSizeScale(incomingLinkCounts[d.id]) + collisionPadding))
             .force("x", d3.forceX(width / 2).strength(0.05))
             .force("y", d3.forceY(boundaryY / 2).strength(0.05));
 
         for (let i = 0; i < 300; ++i) simulation.tick();
 
-        // Calculate positions for isolated nodes in a grid below connected nodes
-        const isolatedCols = Math.ceil(Math.sqrt(isolatedNodes.length));
-        const colSpacing = 60; 
-        const rowSpacing = 80; 
-        const maxCols = Math.floor(width / colSpacing) || 1; // max number of columns that fit horizontally
-        const marginLeft = 50;   // left margin
-        const marginRight = 50;
+        // Responsive isolated nodes grid
+        const colSpacing = isMobile ? 50 : isTablet ? 55 : 60;
+        const rowSpacing = isMobile ? 65 : isTablet ? 72 : 80;
+        const marginLeft = isMobile ? 20 : isTablet ? 35 : 50;
+        const marginRight = isMobile ? 20 : isTablet ? 35 : 50;
         const availableWidth = width - marginLeft - marginRight;
+        const maxCols = Math.max(1, Math.floor(availableWidth / colSpacing));
 
         isolatedNodes.forEach((node, i) => {
             const row = Math.floor(i / maxCols);
             const col = i % maxCols;
 
-            // Center row horizontally
             const nodesInRow = Math.min(maxCols, isolatedNodes.length - row * maxCols);
             const rowWidth = nodesInRow * colSpacing;
             const startX = marginLeft + (availableWidth - rowWidth) / 2 + colSpacing / 2;
 
             node.x = startX + col * colSpacing;
-            node.y = boundaryY + 80 + row * rowSpacing;
+            node.y = boundaryY + (isMobile ? 60 : 80) + row * rowSpacing;
         });
 
-        // Ensure connected nodes stay within top area
+        // Ensure connected nodes stay within bounds
+        const padding = isMobile ? 20 : 30;
         connectedNodes.forEach(node => {
-            node.x = Math.min(Math.max(node.x, 30), width - 30);
-            node.y = Math.min(Math.max(node.y, 30), boundaryY - 30);
+            node.x = Math.min(Math.max(node.x, padding), width - padding);
+            node.y = Math.min(Math.max(node.y, padding), boundaryY - padding);
         });
 
-        // Draw the horizontal divider line
+        // Draw divider line
         svg.append("line")
             .attr("x1", 0)
             .attr("y1", boundaryY)
@@ -153,13 +184,13 @@ const StaticGraph = ({ data }) => {
             .attr("stroke-dasharray", "5,5")
             .attr("stroke-width", 1);
 
-        // Add label for isolated nodes
+        // Label for isolated nodes
         if (isolatedNodes.length > 0) {
             svg.append("text")
                 .attr("x", width / 2)
-                .attr("y", boundaryY + 30)
+                .attr("y", boundaryY + (isMobile ? 25 : 30))
                 .attr("text-anchor", "middle")
-                .attr("font-size", "14px")
+                .attr("font-size", isMobile ? "12px" : "14px")
                 .attr("font-family", "Arial")
                 .attr("font-weight", "bold")
                 .text("Isolated Nodes");
@@ -178,7 +209,7 @@ const StaticGraph = ({ data }) => {
             .attr("x2", d => d.target.x)
             .attr("y2", d => d.target.y)
             .attr("stroke", "grey")
-            .attr("stroke-width", 1)
+            .attr("stroke-width", isMobile ? 0.5 : 1)
             .attr("stroke-opacity", 0.3);
         
         // Draw connected nodes
@@ -194,7 +225,6 @@ const StaticGraph = ({ data }) => {
             const g = d3.select(this);
             const nodeSize = nodeSizeScale(incomingLinkCounts[d.id]);
             
-            // Add a tooltip with link count information
             const tooltip = g.append("title")
                 .text(d => `${d.title || d.id}\nIncoming links: ${incomingLinkCounts[d.id]}`);
                 
@@ -208,14 +238,18 @@ const StaticGraph = ({ data }) => {
                 .attr("fill", d => colorScale(d.category))
                 .attr("class", "node-circle");
             
+            // Responsive font size
+            const baseFontSize = isMobile ? 8 : 10;
+            const fontSize = Math.min(baseFontSize + (nodeSize - minNodeSize) / 5, isMobile ? 11 : 14);
+            
             a.append("text")
                 .attr("fill", "black")
-                .attr("font-size", d => Math.min(10 + (nodeSize - minNodeSize) / 5, 14) + "px") // Scale font size with node
+                .attr("font-size", `${fontSize}px`)
                 .attr("font-family", "Arial")
                 .attr("font-weight", "bold")
                 .attr("text-anchor", "middle")
                 .attr("dy", ".35em")
-                .text(d => abbreviateText(d.title || d.id, nodeSize));
+                .text(d => abbreviateText(d.title || d.id, nodeSize, isMobile));
         });
         
         // Draw isolated nodes
@@ -229,7 +263,6 @@ const StaticGraph = ({ data }) => {
             
         isolatedNodeGroups.each(function(d) {
             const g = d3.select(this);
-            // Isolated nodes get the minimum size
             const nodeSize = minNodeSize;
             
             const tooltip = g.append("title")
@@ -247,18 +280,17 @@ const StaticGraph = ({ data }) => {
             
             a.append("text")
                 .attr("fill", "black")
-                .attr("font-size", "10px")
+                .attr("font-size", isMobile ? "8px" : "10px")
                 .attr("font-family", "Arial")
                 .attr("font-weight", "bold")
                 .attr("text-anchor", "middle")
                 .attr("dy", ".35em")
-                .text(d => abbreviateText(d.title || d.id, nodeSize));
+                .text(d => abbreviateText(d.title || d.id, nodeSize, isMobile));
         });
         
         // Add hover effects for connected nodes
         connectedNodeGroups.on("mouseover", (event, d) => {
             const nodeId = d.id;
-            // Highlight links connected to this node
             svg.selectAll(".link").classed("highlighted", link => {
                 const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
                 const targetId = typeof link.target === 'object' ? link.target.id : link.target;
@@ -281,29 +313,24 @@ const StaticGraph = ({ data }) => {
             })
         })
         .on("mouseout", (event) => {
-            // Remove highlight when mouse leaves
             svg.selectAll(".link").classed("highlighted", false);
             d3.select(event.currentTarget).select("circle").classed("highlighted", false);
-            // Unhighlight all node circles
             svg.selectAll(".node-circle").classed("highlighted", false);
         });
 
         // Add hover effects for isolated nodes
         isolatedNodeGroups.on("mouseover", (event, d) => {
-            // Highlight links connected to this node
             d3.select(event.currentTarget).select("circle").classed("highlighted", true);
         })
         .on("mouseout", (event) => {
-            // Remove highlight when mouse leaves
             d3.select(event.currentTarget).select("circle").classed("highlighted", false);
         });
     };
     
-    function abbreviateText(text, nodeRadius) {
+    function abbreviateText(text, nodeRadius, isMobile = false) {
         if (!text) return "";
         
-        // Determine maxLength based on the node size (scale factor can be adjusted)
-        const scaleFactor = 0.22; // tweak this to control label length per radius unit
+        const scaleFactor = isMobile ? 0.18 : 0.22;
         const maxLength = Math.floor(nodeRadius * scaleFactor);
         
         if (text.length > maxLength) {
@@ -316,11 +343,9 @@ const StaticGraph = ({ data }) => {
         const svgElement = document.getElementById("graph");
         const clonedSvg = svgElement.cloneNode(true);
     
-        // Add necessary namespaces
         clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
         clonedSvg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
     
-        // Add styles for exported SVG
         const styleElement = document.createElementNS("http://www.w3.org/2000/svg", "style");
         styleElement.textContent = `
             .link { stroke: #aaa; stroke-width: 2; transition: stroke 0.3s; }
@@ -337,7 +362,6 @@ const StaticGraph = ({ data }) => {
                 stroke-width: 2px;
                 transition: stroke 0.3s, stroke-width 0.3s;
             }
-
             .node-circle.highlighted {
                 stroke: orange;
                 stroke-width: 4px;
@@ -345,7 +369,6 @@ const StaticGraph = ({ data }) => {
         `;
         clonedSvg.insertBefore(styleElement, clonedSvg.firstChild);
     
-        // Add a script for interactivity when opened in the browser
         const scriptContent = `
             document.addEventListener('DOMContentLoaded', function() {
                 const nodes = document.querySelectorAll('.node-group');
@@ -368,7 +391,6 @@ const StaticGraph = ({ data }) => {
                     const circle = node.querySelector('circle');
 
                     node.addEventListener('mouseover', () => {
-                        // Highlight links
                         links.forEach(link => {
                             const source = link.getAttribute('data-source');
                             const target = link.getAttribute('data-target');
@@ -377,10 +399,8 @@ const StaticGraph = ({ data }) => {
                             }
                         });
 
-                        // Highlight this node
                         circle.classList.add('highlighted');
 
-                        // Highlight connected nodes
                         nodes.forEach(otherNode => {
                             const otherNodeId = getNodeId(otherNode);
                             if (otherNodeId !== nodeId && isConnected(nodeId, otherNodeId)) {
@@ -391,7 +411,6 @@ const StaticGraph = ({ data }) => {
                     });
 
                     node.addEventListener('mouseout', () => {
-                        // Remove highlights
                         links.forEach(link => link.classList.remove('highlighted'));
                         nodes.forEach(n => {
                             const c = n.querySelector('circle');
@@ -399,7 +418,6 @@ const StaticGraph = ({ data }) => {
                         });
                     });
 
-                    // Open link if clicked
                     node.addEventListener('click', function() {
                         const url = node.getAttribute('data-url');
                         if (url) {
@@ -414,7 +432,6 @@ const StaticGraph = ({ data }) => {
         scriptElement.textContent = scriptContent;
         clonedSvg.appendChild(scriptElement);
     
-        // Convert to blob and trigger download
         const serializer = new XMLSerializer();
         const svgData = serializer.serializeToString(clonedSvg);
         const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
@@ -474,11 +491,9 @@ const StaticGraph = ({ data }) => {
         const clonedSvg = svgElement.cloneNode(true);
         
         clonedSvg.setAttribute("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
-        
         clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
         clonedSvg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
         
-        // Add styles for exported PDF
         const styleElement = document.createElementNS("http://www.w3.org/2000/svg", "style");
         styleElement.textContent = `
             .link { stroke: #aaa; stroke-width: 2; }
@@ -506,19 +521,16 @@ const StaticGraph = ({ data }) => {
         
         let orientation = svgWidth > svgHeight ? 'landscape' : 'portrait';
         
-        // Create a new PDF with jsPDF
         const pdf = new jsPDF({
             orientation: orientation,
             unit: 'pt',
             format: [svgWidth, svgHeight]
         });
         
-        // Add SVG to PDF document
         const element = document.createElement('div');
         element.innerHTML = svgData;
         const svgElement2 = element.firstChild;
         
-        // Convert SVG to PDF
         pdf.svg(svgElement2, {
             x: 0,
             y: 0,
@@ -526,40 +538,41 @@ const StaticGraph = ({ data }) => {
             height: svgHeight
         })
         .then(() => {
-            // Save the PDF file
             pdf.save('static-graph.pdf');
         });
     };
 
-
-const handleDownloadCSV = async () => {
-    try {
-        const response = await fetch(`${base_url}/CHe_cloud_data/export_csv`);
-        
-        if (!response.ok) {
-        throw new Error('Failed to download CSV');
+    const handleDownloadCSV = async () => {
+        try {
+            const response = await fetch(`${base_url}/CHe_cloud_data/export_csv`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to download CSV');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'CHeCLOUD_datasets.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading CSV:', error);
+            alert('Failed to download CSV. Please try again.');
         }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'CHeCLOUD_datasets.csv';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error('Error downloading CSV:', error);
-        alert('Failed to download CSV. Please try again.');
-    }
     };
+
+    // Determine if we're on mobile for button layout
+    const isMobileView = dimensions.width < 768;
 
     return (
         <div
           style={{
-            height: "100vh", // Full height of the viewport
-            width: "100vw",  // Full width of the viewport
+            height: "100vh",
+            width: "100vw",
             margin: 0,
             padding: 0,
             display: "flex",
@@ -568,7 +581,15 @@ const handleDownloadCSV = async () => {
           }}
         >
           {/* Graph Area */}
-          <div style={{ flex: 1, position: "relative", overflowY: "auto" }}>
+          <div 
+            ref={containerRef}
+            style={{ 
+              flex: 1, 
+              position: "relative", 
+              overflowY: "auto",
+              minHeight: 0 // Important for flexbox
+            }}
+          >
             <svg id="graph" width="100%" height="100%">
               {data.nodes.length === 0 && (
                 <text x="50%" y="50%" textAnchor="middle" fontSize="16px" fill="#555">
@@ -578,13 +599,16 @@ const handleDownloadCSV = async () => {
             </svg>
           </div>
     
-          {/* Button Bar */}
+          {/* Button Bar - Responsive */}
           <div
             style={{
-                padding: "20px",
+                padding: isMobileView ? "12px" : "20px",
                 display: "flex",
+                flexDirection: isMobileView ? "column" : "row",
+                flexWrap: "wrap",
                 justifyContent: "center",
-                gap: "20px",
+                alignItems: "center",
+                gap: isMobileView ? "10px" : "20px",
                 backgroundColor: "#f9fafb",
                 borderTop: "1px solid #e5e7eb",
             }}
@@ -592,52 +616,54 @@ const handleDownloadCSV = async () => {
             <button
               id="download"
               onClick={handleDownload}
-              style={buttonStyle("#3B82F6", "#2563EB")}
+              style={buttonStyle("#3B82F6", "#2563EB", isMobileView)}
               onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#2563EB")}
               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#3B82F6")}
             >
-              Download cloud as SVG
+              {isMobileView ? "SVG" : "Download cloud as SVG"}
             </button>
             <button
               onClick={handleDownloadPNG}
-              style={buttonStyle("#10B981", "#059669")}
+              style={buttonStyle("#10B981", "#059669", isMobileView)}
               onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#059669")}
               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#10B981")}
             >
-              Download Cloud as PNG
+              {isMobileView ? "PNG" : "Download Cloud as PNG"}
             </button>
             <button
               onClick={handleDownloadPDF}
-              style={buttonStyle("#EF4444", "#DC2626")}
+              style={buttonStyle("#EF4444", "#DC2626", isMobileView)}
               onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#DC2626")}
               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#EF4444")}
             >
-              Download Cloud as PDF
+              {isMobileView ? "PDF" : "Download Cloud as PDF"}
             </button>
-            
             <button
               onClick={handleDownloadCSV}
-              style={buttonStyle("#F59E0B", "#D97706")}
+              style={buttonStyle("#F59E0B", "#D97706", isMobileView)}
               onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#D97706")}
               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#F59E0B")}
             >
-              Download Cloud as CSV
+              {isMobileView ? "CSV" : "Download Cloud as CSV"}
             </button>
           </div>
           <Footer />
         </div>
-      );
+    );
 
-    function buttonStyle(color, hoverColor) {
+    function buttonStyle(color, hoverColor, isMobile) {
         return {
-        padding: "10px 20px",
-        backgroundColor: color,
-        color: "white",
-        border: "none",
-        borderRadius: "9999px",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        cursor: "pointer",
-        transition: "all 0.3s ease",
+            padding: isMobile ? "10px 16px" : "10px 20px",
+            backgroundColor: color,
+            color: "white",
+            border: "none",
+            borderRadius: "9999px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            fontSize: isMobile ? "13px" : "14px",
+            width: isMobile ? "100%" : "auto",
+            maxWidth: isMobile ? "300px" : "none",
         };
     }
 };
