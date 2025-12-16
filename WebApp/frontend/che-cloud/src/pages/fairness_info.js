@@ -37,6 +37,9 @@ function FairnessInfo(){
     const [loadingExplanationOT, setLoadingExplanationOT] = useState(false);
     const [animatedTextOT, setAnimatedTextOT] = useState('');
     const [doneOT, setDoneOT] = useState(false);
+    // Linked datasets
+    const [linkedDatasets, setLinkedDatasets] = useState([]);
+    const [showLinkedDatasets, setShowLinkedDatasets] = useState(false);
 
     useEffect(() => {
         async function getFairnessData(){
@@ -59,13 +62,43 @@ function FairnessInfo(){
         async function getJsonData(){
             try {
                 const response = await axios.get(`${base_url}/CHe_cloud_data/dataset_metadata/${dataset_id}`);
-                setDatasetMetadata(response.data)
+                setDatasetMetadata(response.data);
+                
+                // Process linked datasets if they exist
+                if (response.data.links && Array.isArray(response.data.links) && response.data.links.length > 0) {
+                    // Fetch details for each linked dataset
+                    const linkPromises = response.data.links.map(async (link) => {
+                        try {
+                            const linkResponse = await axios.get(`${base_url}/CHe_cloud_data/dataset_metadata/${link.target}`);
+                            return {
+                                ...link,
+                                title: linkResponse.data.title,
+                                description: linkResponse.data.description?.en || '',
+                                website: linkResponse.data.website,
+                                exists: true
+                            };
+                        } catch (error) {
+                            console.error(`Error fetching link data for ${link.target}:`, error);
+                            // Dataset not found in our system
+                            return {
+                                ...link,
+                                title: link.target,
+                                description: 'This dataset is not in CHeCLOUD because is not a cultural heritage dataset. You can see its metadata in the LOD Cloud.',
+                                website: '',
+                                exists: false
+                            };
+                        }
+                    });
+                    
+                    const enrichedLinks = await Promise.all(linkPromises);
+                    setLinkedDatasets(enrichedLinks);
+                }
             } catch (error) {
             console.error("Error:",error)
             }
         } 
         getJsonData();
-    }, [])
+    }, [dataset_id])
 
     useEffect(() => {
         if (fairness_ot && Object.keys(fairness_ot).length > 0) {
@@ -153,6 +186,11 @@ function FairnessInfo(){
         } finally {
             setLoadingExplanationOT(false);
         }
+    };
+
+    // Format number with thousands separator
+    const formatNumber = (num) => {
+        return parseInt(num).toLocaleString();
     };
 
     return (
@@ -267,6 +305,104 @@ function FairnessInfo(){
                     </Row>
                 </div>
             )}
+
+            {linkedDatasets.length > 0 && (
+                <div className="card shadow-sm p-4 mb-4 mt-4">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h5 className="mb-0">🔗 Linked Datasets ({linkedDatasets.length})</h5>
+                        <button
+                            className="btn btn-outline-secondary btn-sm"
+                            onClick={() => setShowLinkedDatasets(!showLinkedDatasets)}
+                        >
+                            {showLinkedDatasets ? 'Hide Links' : 'Show Links'}
+                        </button>
+                    </div>
+                    
+                    {showLinkedDatasets && (
+                        <Row className="g-3 mt-2">
+                            {linkedDatasets.map((link, index) => (
+                                <Col md={6} key={index}>
+                                    <div className={`card h-100 border-start ${link.exists ? 'border-primary' : 'border-secondary'} border-4 shadow-sm ${link.exists ? 'hover-shadow' : ''}`}
+                                         style={{ 
+                                             transition: 'all 0.3s ease',
+                                             opacity: link.exists ? 1 : 0.8
+                                         }}>
+                                        <div className="card-body">
+                                            <div className="d-flex justify-content-between align-items-start mb-2">
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <h6 className={`card-title mb-0 ${link.exists ? 'text-primary' : 'text-muted'}`}>
+                                                        {link.exists ? (
+                                                            <Link 
+                                                                to={`/fairness-info?dataset_id=${link.target}`}
+                                                                className="text-decoration-none"
+                                                            >
+                                                                {link.title || link.target}
+                                                            </Link>
+                                                        ) : (
+                                                            <span>{link.title || link.target}</span>
+                                                        )}
+                                                    </h6>
+                                                    {!link.exists && (
+                                                        <span className="badge bg-warning text-dark" style={{ fontSize: '0.7rem' }}>
+                                                            Not Indexed
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span className="badge bg-info text-dark">
+                                                    {formatNumber(link.value)} triples
+                                                </span>
+                                            </div>
+                                            
+                                            <p className={`card-text ${link.exists ? 'text-muted' : 'text-warning'} small mb-2`}
+                                               style={{ 
+                                                   display: '-webkit-box',
+                                                   WebkitLineClamp: 2,
+                                                   WebkitBoxOrient: 'vertical',
+                                                   overflow: 'hidden'
+                                               }}>
+                                                {link.description || 'No description available'}
+                                            </p>
+                                            
+                                            <div className="d-flex gap-2 mt-2">
+                                                {link.exists ? (
+                                                    <>
+                                                        <Link 
+                                                            to={`/fairness-info?dataset_id=${link.target}`}
+                                                            className="btn btn-sm btn-outline-primary"
+                                                        >
+                                                            View Details →
+                                                        </Link>
+                                                        {link.website && (
+                                                            <a 
+                                                                href={link.website}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="btn btn-sm btn-outline-secondary"
+                                                            >
+                                                                🌐 Website
+                                                            </a>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Link 
+                                                            to={`https://lod-cloud.net/dataset/${link.target}`}
+                                                            className="btn btn-sm btn-outline-primary"
+                                                        >
+                                                            View Details on the LOD Cloud →
+                                                        </Link>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Col>
+                            ))}
+                        </Row>
+                    )}
+                </div>
+            )}
+
             <div className="mb-4">
                 {dataset_metadata?.keywords && !dataset_metadata.keywords.includes("CHeCLOUD") && (
                     <small className="text-muted ">
@@ -383,6 +519,13 @@ function FairnessInfo(){
                 </Row>
             </div>
             <Footer />
+
+            <style jsx>{`
+                .hover-shadow:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                }
+            `}</style>
         </>
       );
 }
