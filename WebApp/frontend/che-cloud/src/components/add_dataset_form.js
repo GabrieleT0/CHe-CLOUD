@@ -33,7 +33,7 @@ const FormComponent = () => {
     example: [],
     other_download: [],
     namespace: '',
-    links: [], //todo
+    links: [], // Array of {kg_id, kg_name, triples}
     time: '',
     triples: 0,
     category: '', 
@@ -51,8 +51,32 @@ const FormComponent = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const dataset_id = queryParams.get('dataset_id');
+  
+  const [availableKGs, setAvailableKGs] = useState([]);
+  const [loadingKGs, setLoadingKGs] = useState(false);
+  const [kgError, setKgError] = useState(null);
 
-    useEffect(() => {
+  // Fetch available knowledge graphs
+  useEffect(() => {
+    const fetchKGs = async () => {
+      setLoadingKGs(true);
+      setKgError(null);
+      try {
+        const response = await fetch(`${base_url}/CHe_cloud_data/all_ch_links`);
+        if (!response.ok) throw new Error('Failed to fetch knowledge graphs');
+        const data = await response.json();
+        setAvailableKGs(data.nodes);
+      } catch (err) {
+        setKgError('Could not load available knowledge graphs: ' + err.message);
+        console.error('Error fetching KGs:', err);
+      } finally {
+        setLoadingKGs(false);
+      }
+    };
+    fetchKGs();
+  }, []);
+
+  useEffect(() => {
     if (dataset_id) {
       const fetchDataset = async () => {
         try {
@@ -97,7 +121,11 @@ const FormComponent = () => {
             newKeyword: "",
             Image: data.Image || '',
             namespace: data.namespace || '',
-            links: Array.isArray(data.links) ? data.links : [],
+            links: Array.isArray(data.links) ? data.links.map(link => ({
+              kg_id: link.target || '',
+              kg_name: availableKGs.find(kg => kg.identifier === link.target)?.title || '',
+              triples: parseInt(link.value) || 0
+            })) : [],
             time: data.time || '',
             triples: data.triples || 0,
             identifier: data.identifier || '',
@@ -116,7 +144,7 @@ const FormComponent = () => {
       };
       fetchDataset();
     }
-  }, [dataset_id]);
+  }, [dataset_id, availableKGs]);
 
 
   const handleChange = (e) => {
@@ -136,7 +164,7 @@ const FormComponent = () => {
           sparql: sparql
         }));
       } else if (name.startsWith('full_download-')) {
-        const [_, index, field] = name.split('-'); // e.g., resource-0-title, resource-0-url, resource-0-description
+        const [_, index, field] = name.split('-');
         const newResources = [...formData.full_download];
         newResources[index] = {
           ...newResources[index],
@@ -169,6 +197,30 @@ const FormComponent = () => {
         setFormData(prev => ({
           ...prev,
           other_download: newResources
+        }));
+      }
+      else if (name.startsWith('link-')) {
+        const [_, index, field] = name.split('-');
+        const newLinks = [...formData.links];
+        
+        if (field === 'kg_id') {
+          // Find the selected KG to get its name
+          const selectedKG = availableKGs.find(kg => kg.id === value);
+          newLinks[index] = {
+            ...newLinks[index],
+            kg_id: value,
+            kg_name: selectedKG ? selectedKG.title : ''
+          };
+        } else {
+          newLinks[index] = {
+            ...newLinks[index],
+            [field]: field === 'triples' ? parseInt(value) || 0 : value
+          };
+        }
+        
+        setFormData(prev => ({
+          ...prev,
+          links: newLinks
         }));
       }
       else if (name === 'sub-category' && value) {
@@ -214,7 +266,7 @@ const FormComponent = () => {
           }
         }));
       }
-      else if(!name.startsWith('sparql-') && !name.startsWith('full_download-') && !name.startsWith('example-') && !name.startsWith('other_download-') && name !== 'contact-point-name' && name !== 'contact-point-email' && name !== 'owner-name' && name !== 'owner-email' && name !== 'sub-category' && name !== 'resourceType'){
+      else if(!name.startsWith('sparql-') && !name.startsWith('full_download-') && !name.startsWith('example-') && !name.startsWith('other_download-') && !name.startsWith('link-') && name !== 'contact-point-name' && name !== 'contact-point-email' && name !== 'owner-name' && name !== 'owner-email' && name !== 'sub-category' && name !== 'resourceType'){
         setFormData(prev => ({
           ...prev,
           [name]: value
@@ -244,7 +296,7 @@ const FormComponent = () => {
     const key = e.key;
   
     if (key === 'Enter' || key === ',' || key === ' ' || key === 'Tab' || key === ';') {
-      e.preventDefault(); // prevent form submit or unwanted input
+      e.preventDefault();
       const newKw = formData.newKeyword.trim();
   
       if (newKw && !formData.keywords.includes(newKw)) {
@@ -260,6 +312,22 @@ const FormComponent = () => {
         }));
       }
     };
+  };
+
+  // Handlers for linked datasets
+  const handleAddLink = () => {
+    setFormData(prev => ({
+      ...prev,
+      links: [...prev.links, { kg_id: '', kg_name: '', triples: 0 }]
+    }));
+  };
+
+  const handleRemoveLink = (index) => {
+    const newLinks = formData.links.filter((_, i) => i !== index);
+    setFormData(prev => ({
+      ...prev,
+      links: newLinks
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -295,6 +363,12 @@ const FormComponent = () => {
         full_download: formData.full_download,
         example: formData.example,
         other_download: formData.other_download,
+        links: formData.links
+          .filter(link => link.kg_id && link.kg_name)
+          .map(link => ({
+            target: link.kg_id,
+            value: link.triples.toString()
+          })),
     };
 
     if (!DOI_REGEX.test(formData.doi) && formData.doi !== '') {
@@ -331,11 +405,23 @@ const FormComponent = () => {
   const handleFinalSubmit = async () => {
     try {
       setIsSubmitting(true);
+      
+      // Transform links to the correct format for final submission
+      const transformedFormData = {
+        ...formData,
+        links: formData.links
+          .filter(link => link.kg_id && link.kg_name)
+          .map(link => ({
+            target: link.kg_id,
+            value: link.triples.toString()
+          }))
+      };
+      console.log('Submitting final data:', transformedFormData);
       const response = await fetch(`${base_url}/monitoring_requests/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          'formData': formData,
+          'formData': transformedFormData,
           'llm_topic': modalData.llm_response,
           'is_update': dataset_id ? true : false,
           })
@@ -581,6 +667,12 @@ const FormComponent = () => {
       {error && (
         <div className="alert alert-danger" role="alert">
           {error}
+        </div>
+      )}
+
+      {kgError && (
+        <div className="alert alert-warning" role="alert">
+          {kgError}
         </div>
       )}
 
@@ -843,6 +935,105 @@ const FormComponent = () => {
         <option value="ch-generic">Generic</option>
       </select>
       <div className="invalid-feedback">Please enter one sub-category.</div>
+    </div>
+
+    <div className="border p-3 mt-4 mb-4 rounded bg-light">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0">Linked Datasets</h5>
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          onClick={handleAddLink}
+          disabled={loadingKGs}
+        >
+          <i className="bi bi-plus-circle me-1"></i>
+          Add Link
+        </button>
+      </div>
+      
+      {loadingKGs && (
+        <div className="text-center py-3">
+          <div className="spinner-border spinner-border-sm text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <span className="ms-2">Loading available datasets...</span>
+        </div>
+      )}
+
+      {formData.links.length === 0 ? (
+        <p className="text-muted mb-0">
+          No linked datasets yet. Click "Add Link" to connect this dataset to an existing dataset.
+        </p>
+      ) : (
+        formData.links.map((link, index) => (
+          <div key={index} className="border p-3 mb-3 rounded bg-white">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <h6 className="mb-0">Link {index + 1}</h6>
+              <button
+                type="button"
+                className="btn btn-danger btn-sm"
+                onClick={() => handleRemoveLink(index)}
+              >
+                Remove
+              </button>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor={`link-${index}-kg_id`} className="form-label">
+               Dataset <span className="text-danger">*</span>
+              </label>
+              <select
+                className="form-select"
+                id={`link-${index}-kg_id`}
+                name={`link-${index}-kg_id`}
+                value={link.kg_id}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Select a Dataset --</option>
+                {availableKGs.map((kg) => (
+                  <option key={kg.id} value={kg.id}>
+                    {kg.title} ({kg.id})
+                  </option>
+                ))}
+              </select>
+              <div className="invalid-feedback">Please select a knowledge graph.</div>
+            </div>
+
+            {link.kg_name && (
+              <div className="mb-3">
+                <label className="form-label">Selected dataset Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={link.kg_name}
+                  disabled
+                />
+              </div>
+            )}
+
+            <div className="mb-3">
+              <label htmlFor={`link-${index}-triples`} className="form-label">
+                Number of Triples <span className="text-danger">*</span>
+              </label>
+              <input
+                type="number"
+                min="0"
+                className="form-control"
+                id={`link-${index}-triples`}
+                name={`link-${index}-triples`}
+                value={link.triples}
+                onChange={handleChange}
+                required
+              />
+              <div className="invalid-feedback">Please enter the number of triples.</div>
+              <small className="form-text text-muted">
+                Specify how many triples from this dataset are linked to the selected knowledge graph
+              </small>
+            </div>
+          </div>
+        ))
+      )}
     </div>
 
     <div className="d-flex gap-3 mb-4">
