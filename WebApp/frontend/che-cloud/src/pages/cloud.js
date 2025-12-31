@@ -34,12 +34,12 @@ return (
     <div className="container-fluid mt-3 px-4">
     <Navbar />
     <div className="d-flex flex-column justify-content-center align-items-center my-3">
-        <h2 style={{ fontFamily: "'Verdana', serif", color: "#3380af" }}>
-        <b>CHeCLOUD</b>
-        </h2>
         <h3 style={{ fontFamily: "'Verdana', serif", color: "#3380af" }}>
-        the Cultural Heritage Linked Open Data Cloud
+        <b>CHeCLOUD</b>
         </h3>
+        <h4 style={{ fontFamily: "'Verdana', serif", color: "#3380af" }}>
+        the Cultural Heritage Linked Open Data Cloud
+        </h4>
     </div>
     <Graph data={data} />
     </div>

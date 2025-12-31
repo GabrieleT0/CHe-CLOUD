@@ -2,21 +2,25 @@ import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import { jsPDF } from 'jspdf';
 import 'svg2pdf.js';
-import { Download, ImageDown } from "lucide-react";
+import { Download, ImageDown, ChevronDown } from "lucide-react";
 import Footer from './footer';
 import { base_url, kghb_url } from '../api';
 
 const StaticGraph = ({ data }) => {
     const [graphRendered, setGraphRendered] = useState(false);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const [hasIsolatedNodes, setHasIsolatedNodes] = useState(false);
     const containerRef = useRef(null);
+    const isolatedSectionRef = useRef(null);
 
     // Handle responsive resizing
     useEffect(() => {
         const updateDimensions = () => {
             if (containerRef.current) {
-                const { clientWidth, clientHeight } = containerRef.current;
-                setDimensions({ width: clientWidth, height: clientHeight });
+                const { clientWidth } = containerRef.current;
+                // Use full viewport height for the connected section
+                const viewportHeight = window.innerHeight;
+                setDimensions({ width: clientWidth, height: viewportHeight });
                 setGraphRendered(false); // Force re-render on resize
             }
         };
@@ -30,15 +34,31 @@ const StaticGraph = ({ data }) => {
     useEffect(() => {
         if (data.nodes.length === 0 || data.links.length === 0 || !dimensions.width) return;
         
+        // Check for isolated nodes
+        const linkedNodeIds = new Set();
+        data.links.forEach(link => {
+            linkedNodeIds.add(typeof link.source === 'object' ? link.source.id : link.source);
+            linkedNodeIds.add(typeof link.target === 'object' ? link.target.id : link.target);
+        });
+        const isolatedNodes = data.nodes.filter(node => !linkedNodeIds.has(node.id));
+        setHasIsolatedNodes(isolatedNodes.length > 0);
+        
         // Render the graph
         renderStaticGraph();
         setGraphRendered(true);
     }, [data, dimensions]);
 
+    const scrollToIsolated = () => {
+        if (isolatedSectionRef.current) {
+            isolatedSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     const renderStaticGraph = () => {
         const svgElement = document.getElementById("graph");
         const width = dimensions.width;
-        const height = dimensions.height;
+        // Connected section takes full viewport height
+        const connectedHeight = dimensions.height;
         const svg = d3.select("#graph");
         
         // Responsive breakpoints
@@ -119,8 +139,8 @@ const StaticGraph = ({ data }) => {
         });
         
         // Responsive node sizes
-        const minNodeSize = isMobile ? 20 : isTablet ? 22 : 25;
-        const maxNodeSize = isMobile ? 45 : isTablet ? 50 : 60;
+        const minNodeSize = isMobile ? 15 : isTablet ? 17 : 26;
+        const maxNodeSize = isMobile ? 35 : isTablet ? 40 : 50;
         const maxIncomingLinks = Math.max(1, ...Object.values(incomingLinkCounts));
         
         const nodeSizeScale = d3.scaleLinear()
@@ -128,33 +148,48 @@ const StaticGraph = ({ data }) => {
             .range([minNodeSize, maxNodeSize])
             .clamp(true);
         
-        // Responsive boundary
-        const boundaryY = height * (isMobile ? 0.65 : 0.7);
-
-        // Responsive force simulation parameters
-        const linkDistance = isMobile ? 80 : isTablet ? 120 : 150;
-        const chargeStrength = isMobile ? -15 : isTablet ? -20 : -25;
-        const collisionPadding = isMobile ? 5 : 9;
-
-        // Pre-calculate positions for connected nodes
-        const simulation = d3.forceSimulation(connectedNodes)
-            .force("link", d3.forceLink(validLinks).id(d => d.id).distance(linkDistance))
-            .force("charge", d3.forceManyBody().strength(chargeStrength))
-            .force("center", d3.forceCenter(width / 2, boundaryY / 2))
-            .force("collide", d3.forceCollide(d => nodeSizeScale(incomingLinkCounts[d.id]) + collisionPadding))
-            .force("x", d3.forceX(width / 2).strength(0.05))
-            .force("y", d3.forceY(boundaryY / 2).strength(0.05));
-
-        for (let i = 0; i < 300; ++i) simulation.tick();
-
-        // Responsive isolated nodes grid
+        // Calculate isolated section height
         const colSpacing = isMobile ? 50 : isTablet ? 55 : 60;
         const rowSpacing = isMobile ? 65 : isTablet ? 72 : 80;
         const marginLeft = isMobile ? 20 : isTablet ? 35 : 50;
         const marginRight = isMobile ? 20 : isTablet ? 35 : 50;
         const availableWidth = width - marginLeft - marginRight;
         const maxCols = Math.max(1, Math.floor(availableWidth / colSpacing));
+        const isolatedRows = Math.ceil(isolatedNodes.length / maxCols);
+        const isolatedSectionHeight = isolatedNodes.length > 0 
+            ? (isMobile ? 100 : 120) + isolatedRows * rowSpacing + 100 
+            : 0;
+        
+        // Total SVG height - set both as attribute and style for proper rendering
+        const totalHeight = connectedHeight + isolatedSectionHeight;
+        svg.attr("height", totalHeight);
+        svg.style("height", `${totalHeight}px`);
+        svg.style("min-height", `${totalHeight}px`);
 
+        // Responsive force simulation parameters
+        const linkDistance = isMobile ? 80 : isTablet ? 120 : 150;
+        const chargeStrength = isMobile ? -15 : isTablet ? -20 : -25;
+        const collisionPadding = isMobile ? 5 : 9;
+        
+        // Calculate legend height to position nodes next to it
+        const legendHeight = categories.length * legendSpacing + 20;
+        const topPadding = isMobile ? 30 : 40;
+
+        // Pre-calculate positions for connected nodes - use full connected height
+        // Center nodes vertically in the available space, accounting for legend
+        const centerY = Math.max(connectedHeight / 2, legendHeight / 2 + topPadding);
+        
+        const simulation = d3.forceSimulation(connectedNodes)
+            .force("link", d3.forceLink(validLinks).id(d => d.id).distance(linkDistance))
+            .force("charge", d3.forceManyBody().strength(chargeStrength))
+            .force("center", d3.forceCenter(width / 2, centerY))
+            .force("collide", d3.forceCollide(d => nodeSizeScale(incomingLinkCounts[d.id]) + collisionPadding))
+            .force("x", d3.forceX(width / 2).strength(0.05))
+            .force("y", d3.forceY(centerY).strength(0.08));
+
+        for (let i = 0; i < 300; ++i) simulation.tick();
+
+        // Position isolated nodes below the connected section
         isolatedNodes.forEach((node, i) => {
             const row = Math.floor(i / maxCols);
             const col = i % maxCols;
@@ -164,33 +199,36 @@ const StaticGraph = ({ data }) => {
             const startX = marginLeft + (availableWidth - rowWidth) / 2 + colSpacing / 2;
 
             node.x = startX + col * colSpacing;
-            node.y = boundaryY + (isMobile ? 60 : 80) + row * rowSpacing;
+            node.y = connectedHeight + (isMobile ? 60 : 80) + row * rowSpacing;
         });
 
-        // Ensure connected nodes stay within bounds
+        // Ensure connected nodes stay within the connected section bounds
+        // Allow nodes to be positioned higher, near the legend
         const padding = isMobile ? 20 : 30;
+        const minY = isMobile ? 15 : 20; // Allow nodes closer to top
         connectedNodes.forEach(node => {
             node.x = Math.min(Math.max(node.x, padding), width - padding);
-            node.y = Math.min(Math.max(node.y, padding), boundaryY - padding);
+            node.y = Math.min(Math.max(node.y, minY), connectedHeight - padding);
         });
 
-        // Draw divider line
-        svg.append("line")
-            .attr("x1", 0)
-            .attr("y1", boundaryY)
-            .attr("x2", width)
-            .attr("y2", boundaryY)
-            .attr("stroke", "#ccc")
-            .attr("stroke-dasharray", "5,5")
-            .attr("stroke-width", 1);
-
-        // Label for isolated nodes
+        // Draw divider line between connected and isolated sections
         if (isolatedNodes.length > 0) {
+            svg.append("line")
+                .attr("x1", 0)
+                .attr("y1", connectedHeight)
+                .attr("x2", width)
+                .attr("y2", connectedHeight)
+                .attr("stroke", "#ccc")
+                .attr("stroke-dasharray", "5,5")
+                .attr("stroke-width", 1);
+
+            // Label for isolated nodes section
             svg.append("text")
+                .attr("id", "isolated-section-label")
                 .attr("x", width / 2)
-                .attr("y", boundaryY + (isMobile ? 25 : 30))
+                .attr("y", connectedHeight + (isMobile ? 25 : 35))
                 .attr("text-anchor", "middle")
-                .attr("font-size", isMobile ? "12px" : "14px")
+                .attr("font-size", isMobile ? "14px" : "16px")
                 .attr("font-family", "Arial")
                 .attr("font-weight", "bold")
                 .text("Isolated Nodes");
@@ -578,76 +616,121 @@ const StaticGraph = ({ data }) => {
             display: "flex",
             flexDirection: "column",
             fontFamily: "sans-serif",
+            overflow: "hidden",
           }}
         >
-          {/* Graph Area */}
+          {/* Scrollable content area */}
           <div 
             ref={containerRef}
             style={{ 
               flex: 1, 
               position: "relative", 
               overflowY: "auto",
-              minHeight: 0 // Important for flexbox
+              overflowX: "hidden",
             }}
           >
-            <svg id="graph" width="100%" height="100%">
+            <svg id="graph" width="100%">
               {data.nodes.length === 0 && (
                 <text x="50%" y="50%" textAnchor="middle" fontSize="16px" fill="#555">
                   Loading graph data...
                 </text>
               )}
             </svg>
+            
+            {/* Invisible anchor for isolated section */}
+            <div ref={isolatedSectionRef} style={{ position: 'absolute', top: dimensions.height, left: 0 }} />
+            
+            {/* Button Bar - Now inside scrollable area, below isolated nodes */}
+            <div
+              style={{
+                  padding: isMobileView ? "12px" : "20px",
+                  display: "flex",
+                  flexDirection: isMobileView ? "column" : "row",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: isMobileView ? "10px" : "20px",
+                  backgroundColor: "#f9fafb",
+                  borderTop: "1px solid #e5e7eb",
+              }}
+            >
+              <button
+                id="download"
+                onClick={handleDownload}
+                style={buttonStyle("#3B82F6", "#2563EB", isMobileView)}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#2563EB")}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#3B82F6")}
+              >
+                {isMobileView ? "SVG" : "Download cloud as SVG"}
+              </button>
+              <button
+                onClick={handleDownloadPNG}
+                style={buttonStyle("#10B981", "#059669", isMobileView)}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#059669")}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#10B981")}
+              >
+                {isMobileView ? "PNG" : "Download Cloud as PNG"}
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                style={buttonStyle("#EF4444", "#DC2626", isMobileView)}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#DC2626")}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#EF4444")}
+              >
+                {isMobileView ? "PDF" : "Download Cloud as PDF"}
+              </button>
+              <button
+                onClick={handleDownloadCSV}
+                style={buttonStyle("#F59E0B", "#D97706", isMobileView)}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#D97706")}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#F59E0B")}
+              >
+                {isMobileView ? "CSV" : "Download Cloud as CSV"}
+              </button>
+            </div>
+            
+            <Footer />
           </div>
-    
-          {/* Button Bar - Responsive */}
-          <div
-            style={{
-                padding: isMobileView ? "12px" : "20px",
+          
+          {/* Fixed "View Isolated Nodes" button - bottom right corner */}
+          {hasIsolatedNodes && (
+            <button
+              onClick={scrollToIsolated}
+              style={{
+                position: "fixed",
+                bottom: isMobileView ? "15px" : "20px",
+                right: isMobileView ? "15px" : "20px",
+                padding: isMobileView ? "8px 12px" : "10px 16px",
+                backgroundColor: "#3380af",
+                color: "white",
+                border: "none",
+                borderRadius: "9999px",
+                boxShadow: "0 3px 10px rgba(51, 128, 175, 0.8)",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                fontSize: isMobileView ? "11px" : "12px",
+                fontWeight: "600",
                 display: "flex",
-                flexDirection: isMobileView ? "column" : "row",
-                flexWrap: "wrap",
-                justifyContent: "center",
                 alignItems: "center",
-                gap: isMobileView ? "10px" : "20px",
-                backgroundColor: "#f9fafb",
-                borderTop: "1px solid #e5e7eb",
-            }}
-          >
-            <button
-              id="download"
-              onClick={handleDownload}
-              style={buttonStyle("#3B82F6", "#2563EB", isMobileView)}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#2563EB")}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#3B82F6")}
+                justifyContent: "center",
+                gap: "6px",
+                zIndex: 1000,
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = "#0d9af2ff";
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 5px 14px rgba(51, 128, 175, 1)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = "#3380af";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 3px 10px rgba(51, 128, 175, 0.8)";
+              }}
             >
-              {isMobileView ? "SVG" : "Download cloud as SVG"}
+              <ChevronDown size={isMobileView ? 14 : 16} />
+              {isMobileView ? "Isolated" : "View Isolated Nodes"}
             </button>
-            <button
-              onClick={handleDownloadPNG}
-              style={buttonStyle("#10B981", "#059669", isMobileView)}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#059669")}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#10B981")}
-            >
-              {isMobileView ? "PNG" : "Download Cloud as PNG"}
-            </button>
-            <button
-              onClick={handleDownloadPDF}
-              style={buttonStyle("#EF4444", "#DC2626", isMobileView)}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#DC2626")}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#EF4444")}
-            >
-              {isMobileView ? "PDF" : "Download Cloud as PDF"}
-            </button>
-            <button
-              onClick={handleDownloadCSV}
-              style={buttonStyle("#F59E0B", "#D97706", isMobileView)}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#D97706")}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#F59E0B")}
-            >
-              {isMobileView ? "CSV" : "Download Cloud as CSV"}
-            </button>
-          </div>
-          <Footer />
+          )}
         </div>
     );
 
