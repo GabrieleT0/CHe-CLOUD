@@ -97,7 +97,6 @@ router.get('/export_csv', async (req, res) => {
         if (!items.length) {
             return res.status(404).json({ message: "No elements found." });
         }
-
         // Define fields with custom labels
         const fields = [
             { label: 'Identifier', value: 'identifier' },
@@ -110,16 +109,11 @@ router.get('/export_csv', async (req, res) => {
             { label: 'Website', value: 'website' },
             { label: 'Triples', value: 'triples' },
             { label: 'owner', value: (row) => `Name: ${row.owner?.name || ''} Email: ${row.owner?.email || ''}` },
-            { label: 'SPARQL Endpoint', value: (row) => row.sparql_endpoint?.[0].access_url || '' },
+            { label: 'SPARQL Endpoint', value: (row) => row.sparql[0]?.access_url || '' },
             { label: 'RDF dump', value: (row) => row.full_download && row.full_download.length > 0 ? row.full_download.map(item => item.download_url).join(' | ') : '' },
             { label: 'Other download', value: (row) => row.other_download && row.other_download.length > 0 ? row.other_download.map(item => item.access_url).join(' | ') : '' },
             { label: 'Namespace', value: 'namespace' },
             { label: 'Examples',  value: (row) => row.example && row.example.length > 0 ? row.example.map(item => item.access_url).join(' | ') : '' },
-            // Map fairness fields
-            ...Object.entries(keyMapping).map(([key, label]) => ({
-                label: label,
-                value: `fairness.${key}`
-            }))
         ];
 
         const csv = parse(items, { fields });
