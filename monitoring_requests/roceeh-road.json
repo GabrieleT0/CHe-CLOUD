@@ -1,0 +1,70 @@
+{
+  "roceeh-road": {
+    "_id": "roceeh-road0000018fe7952923",
+    "identifier": "roceeh-road",
+    "title": "ROCEEH Out of Africa Database (ROAD)",
+    "doi": "",
+    "license": "http://www.opendefinition.org/licenses/cc-by-sa",
+    "description": {
+      "en": "Database on human origins in Africa and Eurasia between 3,000,000 and 20,000 years ago covering prehistoric archaeology, paleoanthropology, paleoenvironment and geography."
+    },
+    "sparql": [
+      {
+        "access_url": "http://www.roceeh.uni-tuebingen.de:3030/road/sparql",
+        "title": "SPARQL Endpoint",
+        "description": ""
+      }
+    ],
+    "full_download": [],
+    "website": "https://www.roceeh.uni-tuebingen.de/roadweb/smarty_road_simple_search.php",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "Christian Sommer",
+      "email": "christian.sommer@uni-tuebingen.de"
+    },
+    "owner": {
+      "name": "",
+      "email": "csommer.geo@gmail.com"
+    },
+    "keywords": [
+      "Archaeology",
+      "Paleoanthropology",
+      "Paleoenvironment",
+      "Paleontology",
+      "Palynology",
+      "Prehistory",
+      "Geography",
+      "cultural-heritage",
+      "ch-tangible"
+    ],
+    "Image": "",
+    "example": [],
+    "other_download": [
+      {
+        "title": "RDF Dump",
+        "access_url": "https://github.com/sommergeo/roceeh2wiki?tab=readme-ov-file",
+        "description": "RDF dump manually discovered"
+      }
+    ],
+    "namespace": "",
+    "links": [
+      {
+        "target": "periodo",
+        "value": "1"
+      },
+      {
+        "target": "dbpedia",
+        "value": "1"
+      },
+      {
+        "target": "w3c",
+        "value": "1"
+      }
+    ],
+    "time": "0000018fe7952923",
+    "triples": "4000000",
+    "category": "ch-tangible",
+    "image": "https://www.hadw-bw.de/sites/default/files/styles/teaser_image_1x_largescreen/public/media/Roceeh.jpg?h=d92b20e8&itok=gKBbZXNA",
+    "newKeyword": ""
+  }
+}
