@@ -121,11 +121,15 @@ const FormComponent = () => {
             newKeyword: "",
             Image: data.Image || '',
             namespace: data.namespace || '',
-            links: Array.isArray(data.links) ? data.links.map(link => ({
-              kg_id: link.target || '',
-              kg_name: availableKGs.find(kg => kg.identifier === link.target)?.title || '',
-              triples: parseInt(link.value) || 0
-            })) : [],
+            links: Array.isArray(data.links) ? data.links.map(link => {
+              const foundKG = availableKGs.find(kg => kg.identifier === link.target);
+              return {
+                kg_id: link.target || '',
+                kg_name: foundKG ? foundKG.title : (link.target || ''),
+                triples: parseInt(link.value) || 0,
+                notFound: !foundKG // Flag to indicate if the KG was not found
+              };
+            }) : [],
             time: data.time || '',
             triples: data.triples || 0,
             identifier: data.identifier || '',
@@ -209,7 +213,8 @@ const FormComponent = () => {
           newLinks[index] = {
             ...newLinks[index],
             kg_id: value,
-            kg_name: selectedKG ? selectedKG.title : ''
+            kg_name: selectedKG ? selectedKG.title : '',
+            notFound: false // Reset notFound flag when user selects a valid KG
           };
         } else {
           newLinks[index] = {
@@ -978,29 +983,48 @@ const FormComponent = () => {
               </button>
             </div>
 
+            {link.notFound ? (
+              // Display as text when KG is not found in the database
+              <div className="alert alert-warning mb-3">
+                <strong>Note:</strong> The linked dataset "{link.kg_name}" is not a Cultural Heritage dataset, for this reason it will not appear linked to this dataset in the CHeCLOUD.
+                The link information will be preserved as-is.
+              </div>
+            ) : null}
+
             <div className="mb-3">
               <label htmlFor={`link-${index}-kg_id`} className="form-label">
                Dataset <span className="text-danger">*</span>
               </label>
-              <select
-                className="form-select"
-                id={`link-${index}-kg_id`}
-                name={`link-${index}-kg_id`}
-                value={link.kg_id}
-                onChange={handleChange}
-                required
-              >
-                <option value="">-- Select a Dataset --</option>
-                {availableKGs.map((kg) => (
-                  <option key={kg.id} value={kg.id}>
-                    {kg.title} ({kg.id})
-                  </option>
-                ))}
-              </select>
+              {link.notFound ? (
+                // Display as read-only text input when not found
+                <input
+                  type="text"
+                  className="form-control"
+                  value={`${link.kg_name} (${link.kg_id})`}
+                  disabled
+                />
+              ) : (
+                // Display as dropdown when found or for new entries
+                <select
+                  className="form-select"
+                  id={`link-${index}-kg_id`}
+                  name={`link-${index}-kg_id`}
+                  value={link.kg_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">-- Select a Dataset --</option>
+                  {availableKGs.map((kg) => (
+                    <option key={kg.id} value={kg.id}>
+                      {kg.title} ({kg.id})
+                    </option>
+                  ))}
+                </select>
+              )}
               <div className="invalid-feedback">Please select a knowledge graph.</div>
             </div>
 
-            {link.kg_name && (
+            {link.kg_name && !link.notFound && (
               <div className="mb-3">
                 <label className="form-label">Selected dataset Name</label>
                 <input
