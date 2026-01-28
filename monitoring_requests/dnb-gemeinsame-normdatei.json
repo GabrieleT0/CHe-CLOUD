@@ -10,8 +10,8 @@
     },
     "sparql": [
       {
-        "access_url": "",
-        "title": "",
+        "access_url": "https://sparql.dnb.de/",
+        "title": "SPARQL Endpoint",
         "description": ""
       }
     ],
