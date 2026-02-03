@@ -13,7 +13,7 @@
     "d3": "^7.9.0",
     "export-to-csv": "^1.4.0",
     "glob": "^13.0.0",
-    "jspdf": "^4.0.0",
+    "jspdf": "^4.1.0",
     "lucide-react": "^0.488.0",
     "material-react-table": "^3.2.1",
     "react": "^19.1.0",
