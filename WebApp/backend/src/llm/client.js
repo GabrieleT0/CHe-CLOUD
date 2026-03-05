@@ -11,7 +11,8 @@ function getLLMClient() {
         temperature:temperature,
         model: process.env.LLM_MODEL,
         openAIApiKey: process.env.OPENAI_API_KEY,
-        timeout: 300000,
+        timeout: 25000,
+        maxRetries: 0,
       });
 
     case "gemini":
@@ -19,7 +20,8 @@ function getLLMClient() {
         temperature: temperature,
         model: process.env.LLM_MODEL,
         apiKey: process.env.GEMINI_API_KEY,
-        timeout: 300000,
+        timeout: 25000,
+        maxRetries: 0,
       });
 
     default:

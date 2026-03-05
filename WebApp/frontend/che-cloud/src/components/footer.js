@@ -5,7 +5,7 @@ function Footer() {
   return (
     <footer className="bg-light text-center text-muted py-3 mt-auto border-top">
       <div className="container">
-        <small>&copy; {new Date().getFullYear()} CHeCLOUD. All rights reserved.</small><br/>
+        <small>&copy; {new Date().getFullYear()} CHeCLOUD. CC BY-SA 4.0</small><br/>
         <small>Antonio Lieto, Maria Angela Pellegrino and Gabriele Tuozzo</small>
         <div className="footer-image" style={{ marginTop: "10px" }}>
           <img
