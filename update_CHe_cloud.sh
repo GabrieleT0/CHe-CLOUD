@@ -8,7 +8,7 @@ cd "$PROJECT_ROOT" || exit 1
 git pull
 
 # Run the Python script
-cd "$PROJECT_ROOT/CHe_cloud_generator" || exit 1
+cd "$PROJECT_ROOT/CHe_cloud_generator/src" || exit 1
 source venv/bin/activate
 cd "$PROJECT_ROOT/CHe_cloud_generator/src" || exit 1
 python3 update_CHe_cloud.py
