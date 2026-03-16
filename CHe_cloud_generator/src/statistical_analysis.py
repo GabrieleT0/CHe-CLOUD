@@ -34,10 +34,10 @@ if missing:
     sys.exit(1)
 
 # Clean up
-df['Triples'] = pd.to_numeric(df['Triples'], errors='coerce').fillna(0)
+df['Triples'] = pd.to_numeric(df['Triples'], errors='coerce')
 df['FAIR score'] = pd.to_numeric(df['FAIR score'], errors='coerce')
 df = df.dropna(subset=['FAIR score'])
-
+print("Dataset dimension: ", df.shape)
 print(f"Loaded {len(df)} rows from '{tsv_path}'")
 
 # Extract first organisation type (handle empty/NaN/multi-value)
@@ -57,8 +57,12 @@ print("\n" + "=" * 65)
 print("PART 1 — CORRELATION: FAIR Score vs Triples")
 print("=" * 65)
 
-fair        = df['FAIR score'].values
-triples     = df['Triples'].values
+# Exclude rows where Triples is not indicated
+df_corr     = df.dropna(subset=['Triples']).copy()
+print(f"Rows used for correlation (Triples available): {len(df_corr)} / {len(df)}")
+
+fair        = df_corr['FAIR score'].values
+triples     = df_corr['Triples'].values
 log_triples = np.log1p(triples)   # log(1+x) — zero-safe log transform
 
 # Normality tests (Shapiro-Wilk)
@@ -153,8 +157,8 @@ gs  = gridspec.GridSpec(2, 2, figure=fig, hspace=0.42, wspace=0.35)
 
 # 4a. Scatter: FAIR vs log(Triples)
 ax1 = fig.add_subplot(gs[0, 0])
-colors_map = {org: plt.cm.tab10(i) for i, org in enumerate(df['Org_primary'].unique())}
-for org, grp in df.groupby('Org_primary'):
+colors_map = {org: plt.cm.tab10(i) for i, org in enumerate(df_corr['Org_primary'].unique())}
+for org, grp in df_corr.groupby('Org_primary'):
     ax1.scatter(np.log1p(grp['Triples']), grp['FAIR score'],
                 alpha=0.65, s=35, label=org, color=colors_map[org])
 m, b_lin = np.polyfit(log_triples, fair, 1)
