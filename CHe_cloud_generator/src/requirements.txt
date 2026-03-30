@@ -20,7 +20,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2025.2
 rdflib==7.1.4
-requests==2.32.4
+requests==2.33.0
 scikit-learn==1.6.1
 scipy==1.15.2
 six==1.17.0
