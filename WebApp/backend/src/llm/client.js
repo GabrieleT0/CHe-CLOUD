@@ -24,6 +24,18 @@ function getLLMClient() {
         maxRetries: 0,
       });
 
+    case "lightning":
+      return new ChatOpenAI({
+        temperature: temperature,
+        model: process.env.LLM_MODEL,
+        openAIApiKey: process.env.LIGHTNING_API_KEY,
+        configuration: {
+          baseURL: process.env.LIGHTNING_AI_BASE_URL,
+        },
+        timeout: 25000,
+        maxRetries: 0,
+      });
+
     default:
       throw new Error(`Unsupported LLM provider: ${provider}`);
   }
