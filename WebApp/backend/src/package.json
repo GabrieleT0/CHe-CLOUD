@@ -7,9 +7,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@langchain/core": "^0.3.62",
-    "@langchain/google-genai": "^0.2.14",
-    "@langchain/openai": "^0.5.18",
+    "@langchain/core": "^1.1.39",
+    "@langchain/google-genai": "^2.1.26",
+    "@langchain/openai": "^1.4.4",
     "axios": "^1.10.0",
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",
