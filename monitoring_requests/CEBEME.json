@@ -1,0 +1,59 @@
+{
+  "CEBEME": {
+    "_id": "",
+    "identifier": "CEBEME",
+    "title": "Continental European Books in Early Modern England, 1500-1640",
+    "doi": "10.48420/31149868",
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "description": {
+      "en": "Dataset of AHRC-funded project Continental European Books in Early Modern England, 1500-1640: A New Approach Using Bibliographic Data Science (CEBEME).\n\nThe CEBEME project set out to expand our knowledge and understanding of the depth, scope, and significance of early modern England’s transnational literary connections by creating the largest dataset to date on foreign books in England between 1500 and 1640, covering all key aspects of the translation, importation, sale, and ownership of books printed in Continental Europe in England.\n\nThe project addressed the following research questions:\n\n- What foreign-language books printed abroad were available early modern England? Which subjects, authors, and works were most popular? In which languages? Where had imported or translated books been printed?\n- Who had access to foreign books in early modern England? How did the circulation of imported or translated books vary depending on the location and social background of readers?\n\nThe project drew on Bibliographic Data Science to harmonize the following five source datasets as Linked Open Data:\n\n1. Renaissance Cultural Crossroads Catalogue (https://www.dhi.ac.uk/data/rcc).\n2. Private Libraries in Renaissance England (https://plre.folger.edu/).\n3. Provincial Booksellers (from the Appendix to Jennifer Winters, ‘The English Provincial Book Trade: Bookseller Stock-Lists, c.1520-1640’ (PhD thesis, University of St Andrews, 2012), available for download at https://hdl.handle.net/10023/3449).\n4. Plantin Sales (ZvL) (Excel spreadsheet with sales of Christophe Plantin to English buyers (1558–89) produced by Zanna van Loon, Curator of Rare Books and Manuscripts at the Museum Plantin-Moretus in Antwerp).\n5. Plantin Sales (CEBEME) (dataset produced by project based on records of sales by Officina Plantiniana to English buyers, 1590-1610).\n\nUsers should refer to the documentation included for detailed information on what is included in the project database and the technical specifications. The database can be accessed via a user interface on the web at https://cebeme.manchester.ac.uk/."
+    },
+    "sparql": [
+      {
+        "access_url": "https://jena.cebeme.manchester.ac.uk/CEBEME/sparql",
+        "title": "",
+        "description": ""
+      }
+    ],
+    "full_download": [
+      {
+        "title": "",
+        "download_url": "https://doi.org/10.48420/31149868",
+        "description": ""
+      }
+    ],
+    "website": "https://cebeme.manchester.ac.uk/",
+    "domain": "cultural-heritage",
+    "contact_point": {
+      "name": "Dr Fred Schurink",
+      "email": "fred.schurink@manchester.ac.uk"
+    },
+    "owner": {
+      "name": "Dr Fred Schurink",
+      "email": "fred.schurink@manchester.ac.uk"
+    },
+    "keywords": [
+      "ch-tangible"
+    ],
+    "Image": "",
+    "example": [
+      {
+        "title": "",
+        "access_url": "https://cebeme.manchester.ac.uk/data/pb/item/1537",
+        "description": ""
+      }
+    ],
+    "other_download": [],
+    "namespace": "http://cebeme.manchester.ac.uk/data/",
+    "links": [
+      {
+        "target": "viaf",
+        "value": "7011"
+      }
+    ],
+    "time": "",
+    "triples": "3739514",
+    "category": "ch-tangible",
+    "newKeyword": ""
+  }
+}
