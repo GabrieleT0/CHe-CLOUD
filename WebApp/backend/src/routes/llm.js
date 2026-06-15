@@ -1,7 +1,14 @@
 const { getLLMClient } = require('../llm/client');
 const {ChatPromptTemplate} = require("@langchain/core/prompts");
+const fs = require('fs');
+const path = require('path');
 const router = require('express').Router();
 const prompts = require('../../data/llms_prompts.json');
+
+const fairDocumentation = fs.readFileSync(
+  path.join(__dirname, '../../data', prompts.fair_documentation_file),
+  'utf8'
+);
 
 const PROMPT = `I give you the title description and id about a dataset, I have to categorize it as Cultural Heritage or Not.  \
             For datasets that are Cultural Heritage, you also need to further specify whether it is Tangible, Intangible, Natural Heritage and finally those that define thesaurus and data models, classify them as Generic.  \
@@ -143,7 +150,8 @@ router.post('/llm_explain_fair', async (req, res) => {
     const chain = prompt.pipe(llm);
 
     const response = await chain.invoke({
-        fair_data: fair_data.fair_data
+        fair_data: fair_data.fair_data,
+        fair_documentation: fairDocumentation
     });
 
     if (!response || !response.content) {
@@ -199,7 +207,8 @@ router.post('/llm_explain_fairness_score_ot', async (req, res) => {
     const chain = prompt.pipe(llm);
 
     const response = await chain.invoke({
-        fair_data: fair_data.fair_data
+        fair_data: fair_data.fair_data,
+        fair_documentation: fairDocumentation
     });
 
     if (!response || !response.content) {
