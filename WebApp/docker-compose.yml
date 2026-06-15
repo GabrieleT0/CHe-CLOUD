@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     ports:
       - "5005:5005"
+    env_file:
+      - ./backend/src/.env
     environment:
       MONGO_URI: mongodb://checloud-mongodb:27017/mywebapp
     depends_on:
