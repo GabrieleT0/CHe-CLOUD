@@ -21,7 +21,7 @@ function getLLMClient() {
       return new ChatOpenAI({
         temperature:temperature,
         model,
-        openAIApiKey: requireEnv("OPENAI_API_KEY"),
+        apiKey: requireEnv("OPENAI_API_KEY"),
         timeout: 25000,
         maxRetries: 0,
       });
@@ -39,7 +39,7 @@ function getLLMClient() {
       return new ChatOpenAI({
         temperature: temperature,
         model,
-        openAIApiKey: requireEnv("LIGHTNING_API_KEY"),
+        apiKey: requireEnv("LIGHTNING_API_KEY"),
         configuration: {
           baseURL: requireEnv("LIGHTNING_AI_BASE_URL"),
         },
