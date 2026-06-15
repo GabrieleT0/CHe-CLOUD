@@ -76,6 +76,48 @@ html, body, #root {
   stroke: orange;
   stroke-width: 4px;
 }
+
+.llm-explanation {
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+.llm-explanation h1,
+.llm-explanation h2,
+.llm-explanation h3,
+.llm-explanation h4 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.llm-explanation h1:first-child,
+.llm-explanation h2:first-child,
+.llm-explanation h3:first-child,
+.llm-explanation h4:first-child {
+  margin-top: 0;
+}
+
+.llm-table-wrapper {
+  margin: 1rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.llm-table-wrapper table {
+  margin-bottom: 0;
+  min-width: 760px;
+}
+
+.llm-table-wrapper th {
+  background-color: var(--bs-tertiary-bg);
+  white-space: nowrap;
+}
+
+.llm-table-wrapper th,
+.llm-table-wrapper td {
+  padding: 0.65rem;
+  vertical-align: top;
+}
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }

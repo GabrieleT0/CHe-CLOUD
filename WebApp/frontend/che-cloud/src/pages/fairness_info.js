@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { base_url, kghb_url } from '../api';
 import axios from 'axios';
@@ -11,7 +11,25 @@ import Footer from '../components/footer';
 import { formatFairnessDataForBrushChart } from '../utils';
 import BrushChart from '../components/line_chart';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Navbar from '../components/navbar';
+
+const normalizeLlmMarkdown = (markdown = '') => markdown
+    .replace(/\r\n?/g, '\n')
+    .replace(/\|\s+\|(?=\s*:?-{3,})/g, '|\n|')
+    .replace(
+        /\|\s+\|(?=\s*(?:F\d|A\d|I\d|R\d)(?:[.\d-]*)(?:\s|\u202f)*[(-])/g,
+        '|\n|'
+    );
+
+const markdownComponents = {
+    table: ({ node, ...props }) => (
+        <div className="llm-table-wrapper">
+            <table className="table table-sm table-striped table-bordered align-middle" {...props} />
+        </div>
+    ),
+    th: ({ node, ...props }) => <th scope="col" {...props} />,
+};
 
 
 
@@ -424,7 +442,7 @@ function FairnessInfo(){
                         </button>
                     </div>
                     {showExplanation && (
-                        <div className="card shadow-sm p-3 my-3">
+                        <div className="card shadow-sm p-3 my-3 llm-explanation">
                             <div className="d-flex justify-content-between align-items-center">
                                 <h5 className="mb-0">LLM Generated Explanation</h5>
                                 <button
@@ -437,7 +455,12 @@ function FairnessInfo(){
                             </div>
                             <small>Model used: <b>{llmExplanation.model_used}</b></small>
                             <hr />
-                            <ReactMarkdown>{llmExplanation.llm_response}</ReactMarkdown>
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={markdownComponents}
+                            >
+                                {normalizeLlmMarkdown(llmExplanation.llm_response)}
+                            </ReactMarkdown>
                         </div>
                     )}
                 </div>
@@ -478,7 +501,7 @@ function FairnessInfo(){
                         </button>
                     </div>
                     {showExplanationOT && (
-                        <div className="card shadow-sm p-3 my-3">
+                        <div className="card shadow-sm p-3 my-3 llm-explanation">
                             <div className="d-flex justify-content-between align-items-center">
                                 <h5 className="mb-0">LLM Generated Explanation</h5>
                                 <button
@@ -491,7 +514,12 @@ function FairnessInfo(){
                             </div>
                             <small>Model used: <b>{llmExplanationOT.model_used}</b></small>
                             <hr />
-                            <ReactMarkdown>{llmExplanationOT.llm_response}</ReactMarkdown>
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={markdownComponents}
+                            >
+                                {normalizeLlmMarkdown(llmExplanationOT.llm_response)}
+                            </ReactMarkdown>
                         </div>
                     )}
                 <Row className="g-1 mt-3">
